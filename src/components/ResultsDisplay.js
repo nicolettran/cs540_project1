@@ -1,0 +1,35 @@
+import React from "react";
+
+const ResultsDisplay = ({ results }) => {
+  return (
+    <div>
+      <h3>Scheduling Results</h3>
+      {results.length > 0 ? (
+        <table border="1">
+          <thead>
+            <tr>
+              <th>Process</th>
+              <th>Arrival Time</th>
+              <th>Burst Time</th>
+              <th>Completion Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {results.map((process, index) => (
+              <tr key={index}>
+                <td>P{index + 1}</td>
+                <td>{process.arrivalTime}</td>
+                <td>{process.burstTime}</td>
+                <td>{process.completionTime}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No results yet. Run an algorithm.</p>
+      )}
+    </div>
+  );
+};
+
+export default ResultsDisplay;
