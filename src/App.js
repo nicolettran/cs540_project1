@@ -10,12 +10,19 @@ function App() {
   const handleGenerateProcesses = ({ numProcesses }) => {
     // Generate random processes
     const newProcesses = Array.from({ length: numProcesses }, (_, i) => ({
-      arrivalTime: Math.floor(Math.random() * 10), // Random arrival time
-      burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time
+      id: i + 1, // Unique Process ID
+      arrivalTime: Math.floor(Math.random() * 10), // Random arrival time (0-9)
+      burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time (1-10)
     }));
+  
+    // Sort processes by arrival time
+    newProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
+  
+    // Update state
     setProcesses(newProcesses);
     setResults([]); // Clear previous results
   };
+  
 
   const handleSelectAlgorithm = (algorithm) => {
     let computedResults = [];
