@@ -2,41 +2,31 @@ import React, { useState } from "react";
 import InputForm from "./components/InputForm";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ResultsDisplay from "./components/ResultsDisplay";
+import { fifo } from "./algorithms/fifo"; // Import FIFO function
 
 function App() {
   const [processes, setProcesses] = useState([]);
   const [results, setResults] = useState([]);
 
   const handleGenerateProcesses = ({ numProcesses }) => {
-    // Generate random processes
     const newProcesses = Array.from({ length: numProcesses }, (_, i) => ({
-      id: i + 1, // Unique Process ID
-      arrivalTime: Math.floor(Math.random() * 10), // Random arrival time (0-9)
-      burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time (1-10)
+      id: i + 1,
+      arrivalTime: Math.floor(Math.random() * 10),
+      burstTime: Math.floor(Math.random() * 10) + 1,
     }));
-  
-    // Sort processes by arrival time
+
     newProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
-  
-    // Update state
     setProcesses(newProcesses);
     setResults([]); // Clear previous results
   };
-  
 
   const handleSelectAlgorithm = (algorithm) => {
     let computedResults = [];
 
-    // Simulate FIFO (Example)
     if (algorithm === "FIFO") {
-      let completionTime = 0;
-      computedResults = processes.map((process) => {
-        completionTime += process.burstTime;
-        return { ...process, completionTime };
-      });
+      computedResults = fifo(processes); // Use FIFO function
     }
 
-    // Update results
     setResults(computedResults);
   };
 
@@ -51,3 +41,5 @@ function App() {
 }
 
 export default App;
+
+
