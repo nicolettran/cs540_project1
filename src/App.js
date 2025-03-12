@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import InputForm from "./components/InputForm";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ResultsDisplay from "./components/ResultsDisplay";
-import { fifo } from "./algorithms/fifo"; // Import FIFO function
+import { fifo } from "./algorithms/fifo";
+import { sjf } from "./algorithms/sjf"; // Import SJF function
 
 function App() {
   const [processes, setProcesses] = useState([]);
@@ -24,7 +25,9 @@ function App() {
     let computedResults = [];
 
     if (algorithm === "FIFO") {
-      computedResults = fifo(processes); // Use FIFO function
+      computedResults = fifo(processes);
+    } else if (algorithm === "SJF") {
+      computedResults = sjf(processes); // Use SJF function
     }
 
     setResults(computedResults);
@@ -41,5 +44,6 @@ function App() {
 }
 
 export default App;
+
 
 
