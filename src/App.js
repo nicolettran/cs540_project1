@@ -1,5 +1,4 @@
-// App.js
-import React, { useState } from "react";
+/*import React, { useState } from "react";
 import InputForm from "./components/InputForm";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ResultsDisplay from "./components/ResultsDisplay";
@@ -53,3 +52,30 @@ function App() {
 }
 
 export default App;
+*/
+
+import { useState } from "react";
+import { generateProcesses } from "../utils/processGenerator";
+
+export default function Home() {
+  const [numProcesses, setNumProcesses] = useState(0);
+  const [processes, setProcesses] = useState([]);
+
+  const handleGenerate = () => {
+    const generatedProcesses = generateProcesses(numProcesses);
+    setProcesses(generatedProcesses);
+  };
+
+  return (
+    <div>
+      <h1>CPU Scheduling Simulator</h1>
+      <input
+        type="number"
+        placeholder="Number of Processes"
+        onChange={(e) => setNumProcesses(parseInt(e.target.value))}
+      />
+      <button onClick={handleGenerate}>Generate Processes</button>
+      <pre>{JSON.stringify(processes, null, 2)}</pre>
+    </div>
+  );
+}
