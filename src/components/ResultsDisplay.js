@@ -1,34 +1,31 @@
-// ResultsDisplay.js
 import React from "react";
 
 const ResultsDisplay = ({ results }) => {
   return (
     <div>
-      <h3>Scheduling Results</h3>
-      {results && results.length > 0 ? (
-        <table border="1">
-          <thead>
-            <tr>
-              <th>Process</th>
-              <th>Arrival Time</th>
-              <th>Burst Time</th>
-              <th>Completion Time</th>
+      <h2>Results</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Process ID</th>
+            <th>Arrival Time</th>
+            <th>Burst Time</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map((result) => (
+            <tr key={result.processId}>
+              <td>{result.processId}</td>
+              <td>{result.arrivalTime}</td>
+              <td>{result.burstTime}</td>
+              <td>{result.startTime}</td>
+              <td>{result.endTime}</td>
             </tr>
-          </thead>
-          <tbody>
-            {results.map((process) => (
-              <tr key={process.id}>
-                <td>{`P${process.id}`}</td>
-                <td>{process.arrivalTime}</td>
-                <td>{process.burstTime}</td>
-                <td>{process.completionTime}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : (
-        <p>No results yet. Run an algorithm.</p>
-      )}
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

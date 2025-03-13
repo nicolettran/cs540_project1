@@ -54,28 +54,64 @@ function App() {
 export default App;
 */
 
-import { useState } from "react";
-import { generateProcesses } from "../utils/processGenerator";
+import React, { useState } from "react";
+import { generateProcesses } from "./utils/processGenerator";
+import { fifo } from "./algorithms/fifo";
+import { sjf } from "./algorithms/sjf";
+import { stcf } from "./algorithms/stcf";
+import { rr } from "./algorithms/rr";
+import { mlfq } from "./algorithms/mlfq";
+import InputForm from "./components/InputForm";
+import ResultsDisplay from "./components/ResultsDisplay";
 
-export default function Home() {
-  const [numProcesses, setNumProcesses] = useState(0);
-  const [processes, setProcesses] = useState([]);
+function App() {
+  const [numProcesses, setNumProcesses] = useState(5);
+  const [timeQuantum, setTimeQuantum] = useState(2);
+  const [selectedAlgorithm, setSelectedAlgorithm] = useState("FIFO");
+  const [results, setResults] = useState([]);
 
-  const handleGenerate = () => {
-    const generatedProcesses = generateProcesses(numProcesses);
-    setProcesses(generatedProcesses);
+  const runAlgorithm = () => {
+    const processes = generateProcesses(numProcesses);
+    let results;
+
+    switch (selectedAlgorithm) {
+      case "FIFO":
+        results = fifo(processes);
+        break;
+      case "SJF":
+        results = sjf(processes);
+        break;
+      case "STCF":
+        results = stcf(processes);
+        break;
+      case "RR":
+        results = rr(processes, timeQuantum);
+        break;
+      case "MLFQ":
+        results = mlfq(processes);
+        break;
+      default:
+        results = [];
+    }
+
+    setResults(results);
   };
 
   return (
     <div>
       <h1>CPU Scheduling Simulator</h1>
-      <input
-        type="number"
-        placeholder="Number of Processes"
-        onChange={(e) => setNumProcesses(parseInt(e.target.value))}
+      <InputForm
+        numProcesses={numProcesses}
+        setNumProcesses={setNumProcesses}
+        timeQuantum={timeQuantum}
+        setTimeQuantum={setTimeQuantum}
+        selectedAlgorithm={selectedAlgorithm}
+        setSelectedAlgorithm={setSelectedAlgorithm}
+        runAlgorithm={runAlgorithm}
       />
-      <button onClick={handleGenerate}>Generate Processes</button>
-      <pre>{JSON.stringify(processes, null, 2)}</pre>
+      <ResultsDisplay results={results} />
     </div>
   );
 }
+
+export default App;

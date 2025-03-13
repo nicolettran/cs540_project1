@@ -1,40 +1,48 @@
-import React, { useState } from "react";
+import React from "react";
 
-const InputForm = ({ onSubmit }) => {
-  const [numProcesses, setNumProcesses] = useState(5); // Corrected variable name
-  const [timeQuantum, setTimeQuantum] = useState(2); // Only used for RR
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSubmit({ numProcesses, timeQuantum }); // Pass the correct variable name
-  };
-
+const InputForm = ({
+  numProcesses,
+  setNumProcesses,
+  timeQuantum,
+  setTimeQuantum,
+  selectedAlgorithm,
+  setSelectedAlgorithm,
+  runAlgorithm,
+}) => {
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
-        Number of Processes:
+    <div>
+      <div>
+        <label>Number of Processes: </label>
         <input
           type="number"
           value={numProcesses}
-          onChange={(e) => setNumProcesses(parseInt(e.target.value, 10))} // Ensure it's a number
-          min="1"
+          onChange={(e) => setNumProcesses(parseInt(e.target.value))}
         />
-      </label>
-      <br />
-      <label>
-        Time Quantum (for RR):
+      </div>
+      <div>
+        <label>Time Quantum (for RR): </label>
         <input
           type="number"
           value={timeQuantum}
-          onChange={(e) => setTimeQuantum(parseInt(e.target.value, 10))} // Ensure it's a number
-          min="1"
+          onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
         />
-      </label>
-      <br />
-      <button type="submit">Generate Processes</button>
-    </form>
+      </div>
+      <div>
+        <label>Select Algorithm: </label>
+        <select
+          value={selectedAlgorithm}
+          onChange={(e) => setSelectedAlgorithm(e.target.value)}
+        >
+          <option value="FIFO">FIFO</option>
+          <option value="SJF">SJF</option>
+          <option value="STCF">STCF</option>
+          <option value="RR">RR</option>
+          <option value="MLFQ">MLFQ</option>
+        </select>
+      </div>
+      <button onClick={runAlgorithm}>Run Algorithm</button>
+    </div>
   );
 };
 
 export default InputForm;
-

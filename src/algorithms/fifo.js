@@ -1,16 +1,15 @@
-export function fifo(processes) {
-    let currentTime = 0; // Tracks CPU time
-  
-    return processes.map((process) => {
-      // If CPU is idle, move to the process's arrival time
-      if (currentTime < process.arrivalTime) {
-        currentTime = process.arrivalTime;
-      }
-  
-      let completionTime = currentTime + process.burstTime;
-      currentTime = completionTime; // Move CPU time forward
-  
-      return { ...process, completionTime };
-    });
-  }
+export const fifo = (processes) => {
+  // Sort processes by arrival time
+  processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
+  let currentTime = 0;
+  const results = processes.map((process) => {
+    const startTime = Math.max(currentTime, process.arrivalTime);
+    const endTime = startTime + process.burstTime;
+    currentTime = endTime;
+    return { ...process, startTime, endTime };
+  });
+
+  return results;
+};
   
