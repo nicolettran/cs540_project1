@@ -1,59 +1,3 @@
-/*import React, { useState } from "react";
-import InputForm from "./components/InputForm";
-import AlgorithmSelector from "./components/AlgorithmSelector";
-import ResultsDisplay from "./components/ResultsDisplay";
-import { fifo } from "./algorithms/fifo";
-import { sjf } from "./algorithms/sjf";
-import { stcf } from "./algorithms/stcf";
-import { rr } from "./algorithms/rr"; // Import the RR algorithm
-
-function App() {
-  const [processes, setProcesses] = useState([]);
-  const [results, setResults] = useState([]);
-  const [timeQuantum, setTimeQuantum] = useState(2); // Add state for time quantum
-
-  const handleGenerateProcesses = ({ numProcesses, timeQuantum }) => {
-    const newProcesses = Array.from({ length: numProcesses }, (_, i) => ({
-      id: i + 1, // Unique Process ID
-      arrivalTime: Math.floor(Math.random() * 10), // Random arrival time (0-9)
-      burstTime: Math.floor(Math.random() * 10) + 1, // Random burst time (1-10)
-      remainingBurstTime: Math.floor(Math.random() * 10) + 1, // Initialize remaining burst time
-    }));
-  
-    newProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime); // Sort processes by arrival time
-    setProcesses(newProcesses); // Update state
-    setResults([]); // Clear previous results
-    setTimeQuantum(timeQuantum); // Update time quantum
-  };
-  
-
-  const handleSelectAlgorithm = (algorithm) => {
-    let newResults = [];
-    if (algorithm === "FIFO") {
-      newResults = fifo(processes);
-    } else if (algorithm === "SJF") {
-      newResults = sjf(processes);
-    } else if (algorithm === "STCF") {
-      newResults = stcf(processes);
-    } else if (algorithm === "RR") {
-      newResults = rr(processes, timeQuantum);
-    }
-    setResults(newResults || []); // Ensure results is always an array
-  };
-
-  return (
-    <div>
-      <h2>CPU Scheduling Simulator</h2>
-      <InputForm onSubmit={handleGenerateProcesses} />
-      <AlgorithmSelector onSelectAlgorithm={handleSelectAlgorithm} />
-      <ResultsDisplay results={results} />
-    </div>
-  );
-}
-
-export default App;
-*/
-
 import React, { useState } from "react";
 import { generateProcesses } from "./utils/processGenerator";
 import { fifo } from "./algorithms/fifo";
@@ -61,55 +5,126 @@ import { sjf } from "./algorithms/sjf";
 import { stcf } from "./algorithms/stcf";
 import { rr } from "./algorithms/rr";
 import { mlfq } from "./algorithms/mlfq";
-import InputForm from "./components/InputForm";
 import ResultsDisplay from "./components/ResultsDisplay";
 
 function App() {
   const [numProcesses, setNumProcesses] = useState(5);
   const [timeQuantum, setTimeQuantum] = useState(2);
+  const [processes, setProcesses] = useState([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("FIFO");
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState({});
+  const [allResults, setAllResults] = useState({});
 
+  // Generate random processes
+  const handleGenerateProcesses = () => {
+    const generatedProcesses = generateProcesses(numProcesses);
+    setProcesses(generatedProcesses);
+    setResults({}); // Clear previous results
+    setAllResults({}); // Clear all results
+  };
+
+  // Run the selected algorithm
   const runAlgorithm = () => {
-    const processes = generateProcesses(numProcesses);
+    if (processes.length === 0) {
+      alert("Please generate processes first.");
+      return;
+    }
+
     let results;
 
     switch (selectedAlgorithm) {
       case "FIFO":
-        results = fifo(processes);
+        results = fifo([...processes]);
         break;
       case "SJF":
-        results = sjf(processes);
+        results = sjf([...processes]);
         break;
       case "STCF":
-        results = stcf(processes);
+        results = stcf([...processes]);
         break;
       case "RR":
-        results = rr(processes, timeQuantum);
+        results = rr([...processes], timeQuantum);
         break;
       case "MLFQ":
-        results = mlfq(processes);
+        results = mlfq([...processes]);
         break;
       default:
         results = [];
     }
 
-    setResults(results);
+    setResults({ [selectedAlgorithm]: results });
+  };
+
+  // Run all algorithms
+  const runAllAlgorithms = () => {
+    if (processes.length === 0) {
+      alert("Please generate processes first.");
+      return;
+    }
+
+    const allResults = {
+      FIFO: fifo([...processes]),
+      SJF: sjf([...processes]),
+      STCF: stcf([...processes]),
+      RR: rr([...processes], timeQuantum),
+      MLFQ: mlfq([...processes]),
+    };
+
+    setAllResults(allResults);
   };
 
   return (
     <div>
       <h1>CPU Scheduling Simulator</h1>
-      <InputForm
-        numProcesses={numProcesses}
-        setNumProcesses={setNumProcesses}
-        timeQuantum={timeQuantum}
-        setTimeQuantum={setTimeQuantum}
-        selectedAlgorithm={selectedAlgorithm}
-        setSelectedAlgorithm={setSelectedAlgorithm}
-        runAlgorithm={runAlgorithm}
-      />
-      <ResultsDisplay results={results} />
+      <div>
+        <label>Number of Processes: </label>
+        <input
+          type="number"
+          value={numProcesses}
+          onChange={(e) => setNumProcesses(parseInt(e.target.value))}
+        />
+      </div>
+      <div>
+        <label>Time Quantum (for RR): </label>
+        <input
+          type="number"
+          value={timeQuantum}
+          onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
+        />
+      </div>
+      <button onClick={handleGenerateProcesses}>Generate Processes</button>
+      <div>
+        <label>Select Algorithm: </label>
+        <select
+          value={selectedAlgorithm}
+          onChange={(e) => setSelectedAlgorithm(e.target.value)}
+        >
+          <option value="FIFO">FIFO</option>
+          <option value="SJF">SJF</option>
+          <option value="STCF">STCF</option>
+          <option value="RR">RR</option>
+          <option value="MLFQ">MLFQ</option>
+        </select>
+        <button onClick={runAlgorithm}>Run Algorithm</button>
+        <button onClick={runAllAlgorithms}>Run All Algorithms</button>
+      </div>
+      {Object.keys(results).length > 0 && (
+        <div>
+          <h2>{selectedAlgorithm} Results</h2>
+          <ResultsDisplay results={results[selectedAlgorithm]} />
+        </div>
+      )}
+      {Object.keys(allResults).length > 0 && (
+        <div>
+          <h2>All Algorithms Results</h2>
+          {Object.entries(allResults).map(([algorithm, results]) => (
+            <div key={algorithm}>
+              <h3>{algorithm}</h3>
+              <ResultsDisplay results={results} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

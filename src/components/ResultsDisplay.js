@@ -3,7 +3,6 @@ import React from "react";
 const ResultsDisplay = ({ results }) => {
   return (
     <div>
-      <h2>Results</h2>
       <table>
         <thead>
           <tr>
