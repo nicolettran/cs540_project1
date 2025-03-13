@@ -110,14 +110,15 @@ function App() {
           <label>Select algorithms: </label>
           <div>
             {["FIFO", "SJF", "STCF", "RR", "MLFQ"].map((algorithm) => (
-              <div key={algorithm}>
+              <div key={algorithm} className="checkbox-group">
                 <input
                   type="checkbox"
                   name={algorithm}
+                  id={algorithm}
                   checked={selectedAlgorithms[algorithm]}
                   onChange={handleAlgorithmSelection}
                 />
-                <label>{algorithm}</label>
+                <label htmlFor={algorithm}>{algorithm}</label>
               </div>
             ))}
           </div>
@@ -137,5 +138,3 @@ function App() {
 }
 
 export default App;
-
-
