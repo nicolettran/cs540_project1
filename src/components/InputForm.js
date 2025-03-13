@@ -96,3 +96,4 @@ const InputForm = ({ onSubmit }) => {
 };
 
 export default InputForm;
+

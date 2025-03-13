@@ -13,10 +13,13 @@ import {
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const ProcessChart = ({ processes, currentTime }) => {
+const ProcessChart = ({ processes, currentTime, numProcesses }) => {
   if (!processes || processes.length === 0) {
     return <div>No processes to display.</div>;
   }
+
+  // Calculate dynamic height based on the number of processes
+  const chartHeight = Math.max(200, numProcesses * 40); // Minimum height of 200px, 40px per process
 
   return (
     <div>
@@ -27,7 +30,7 @@ const ProcessChart = ({ processes, currentTime }) => {
           const dataset = {
             label: processGroup.name, // The algorithm name
             data: processGroup.result.map((process) => ({
-              y: `Process ${process.processId}`, // Process ID on the Y axis
+              y: process.processId, // Process ID on the Y axis (just the number)
               x: [process.startTime, process.endTime], // Start and end time on the X axis
               backgroundColor: "rgba(75, 192, 192, 0.6)", // Color for bars
             })),
@@ -36,7 +39,7 @@ const ProcessChart = ({ processes, currentTime }) => {
 
           // Prepare the data for the chart
           const data = {
-            labels: processGroup.result.map((process) => `Process ${process.processId}`),
+            labels: processGroup.result.map((process) => process.processId.toString()), // Only numbers
             datasets: [dataset],
           };
 
@@ -46,11 +49,10 @@ const ProcessChart = ({ processes, currentTime }) => {
             maintainAspectRatio: false, // Allows custom sizing
             plugins: {
               legend: {
-                position: "top",
+                display: false, // Remove legend (since the title already states the algorithm)
               },
               title: {
-                display: true,
-                text: `${processGroup.name} Gantt Chart`,
+                display: false, // Remove extra title
               },
             },
             scales: {
@@ -66,16 +68,18 @@ const ProcessChart = ({ processes, currentTime }) => {
                 type: "category", // Y-axis represents process IDs (category scale)
                 title: {
                   display: true,
-                  text: "Processes",
+                  text: "Process ID", // Added y-axis label
                 },
               },
             },
           };
 
           return (
-            <div key={processGroup.name} className="gantt-chart">
-              <h4>{processGroup.name}</h4>
-              <Bar data={data} options={options} />
+            <div key={processGroup.name} className="gantt-chart" style={{ height: `${chartHeight}px` }}>
+              <h4 className="gantt-algo-title">{processGroup.name}</h4>
+              <div className="chart-wrapper">
+                <Bar data={data} options={options} />
+              </div>
             </div>
           );
         })}

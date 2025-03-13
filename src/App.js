@@ -23,14 +23,30 @@ function App() {
   const [results, setResults] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("No results to display.");
+  const [showChooseAlgorithmsMessage, setShowChooseAlgorithmsMessage] = useState(false);
 
   // Generate random processes
   const handleGenerateProcesses = () => {
+    setLoadingMessage("Generating processes"); // Start with no dots
+    let dots = 0;
+    const loadingInterval = setInterval(() => {
+      setLoadingMessage("Generating processes" + ".".repeat(dots)); // Append dots based on the current value of `dots`
+      dots = (dots + 1) % 4; // Cycle through 0, 1, 2, 3
+    }, 500); // Update every 500ms
+
     const generatedProcesses = generateProcesses(numProcesses);
     setProcesses(generatedProcesses);
     setResults([]); // Clear previous results
     setCurrentTime(0); // Reset time
     setIsRunning(false); // Stop any running simulation
+
+    // Clear the loading interval after process generation
+    setTimeout(() => {
+      clearInterval(loadingInterval);
+      setLoadingMessage(""); // Clear the message after generating processes
+      setShowChooseAlgorithmsMessage(true); // Show "Please choose any algorithms to run." message
+    }, 2500); // Stop the animation after 2 seconds
   };
 
   // Run selected algorithms
@@ -59,6 +75,7 @@ function App() {
 
     setResults(algorithmsResults);
     setIsRunning(true); // Start the simulation
+    setShowChooseAlgorithmsMessage(false); // Hide the message after running the algorithms
   };
 
   // Simulate the passage of time
@@ -127,7 +144,14 @@ function App() {
       </div>
       <div className="results-container fade-in">
         <h2>Results</h2>
-        <ResultsDisplay results={results} />
+        {/* Show loading message only */}
+        <div className="loading-message">{loadingMessage}</div>
+        {/* Show the "Please choose any algorithms to run" message */}
+        {showChooseAlgorithmsMessage && !results.length && (
+          <div className="loading-message">Please choose any algorithms to run.</div>
+        )}
+        {/* Show ResultsDisplay only when results exist */}
+        {results.length > 0 && <ResultsDisplay results={results} />}
       </div>
       <div className="animation-container slide-in">
         <h2>Simulation</h2>
