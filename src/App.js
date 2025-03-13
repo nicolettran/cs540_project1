@@ -13,7 +13,13 @@ function App() {
   const [numProcesses, setNumProcesses] = useState(5);
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [processes, setProcesses] = useState([]);
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState("FIFO");
+  const [selectedAlgorithms, setSelectedAlgorithms] = useState({
+    FIFO: false,
+    SJF: false,
+    STCF: false,
+    RR: false,
+    MLFQ: false,
+  });
   const [results, setResults] = useState([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -27,36 +33,31 @@ function App() {
     setIsRunning(false); // Stop any running simulation
   };
 
-  // Run the selected algorithm
-  const runAlgorithm = () => {
+  // Run selected algorithms
+  const runAlgorithms = () => {
     if (processes.length === 0) {
       alert("Please generate processes first.");
       return;
     }
 
-    let results;
-
-    switch (selectedAlgorithm) {
-      case "FIFO":
-        results = fifo([...processes]);
-        break;
-      case "SJF":
-        results = sjf([...processes]);
-        break;
-      case "STCF":
-        results = stcf([...processes]);
-        break;
-      case "RR":
-        results = rr([...processes], timeQuantum);
-        break;
-      case "MLFQ":
-        results = mlfq([...processes]);
-        break;
-      default:
-        results = [];
+    const algorithmsResults = [];
+    if (selectedAlgorithms.FIFO) {
+      algorithmsResults.push({ name: "FIFO", result: fifo([...processes]) });
+    }
+    if (selectedAlgorithms.SJF) {
+      algorithmsResults.push({ name: "SJF", result: sjf([...processes]) });
+    }
+    if (selectedAlgorithms.STCF) {
+      algorithmsResults.push({ name: "STCF", result: stcf([...processes]) });
+    }
+    if (selectedAlgorithms.RR) {
+      algorithmsResults.push({ name: "RR", result: rr([...processes], timeQuantum) });
+    }
+    if (selectedAlgorithms.MLFQ) {
+      algorithmsResults.push({ name: "MLFQ", result: mlfq([...processes]) });
     }
 
-    setResults(results);
+    setResults(algorithmsResults);
     setIsRunning(true); // Start the simulation
   };
 
@@ -68,13 +69,21 @@ function App() {
       }, 1000); // Update every second
 
       // Stop the simulation when all processes are completed
-      if (currentTime >= Math.max(...results.map((result) => result.endTime))) {
+      if (currentTime >= Math.max(...results.flatMap(result => result.result.map(process => process.endTime)))) {
         setIsRunning(false);
       }
 
       return () => clearInterval(interval);
     }
   }, [isRunning, currentTime, results]);
+
+  const handleAlgorithmSelection = (e) => {
+    const { name, checked } = e.target;
+    setSelectedAlgorithms((prevState) => ({
+      ...prevState,
+      [name]: checked,
+    }));
+  };
 
   return (
     <div className="app-container">
@@ -98,19 +107,22 @@ function App() {
         </div>
         <button onClick={handleGenerateProcesses}>Generate processes</button>
         <div className="input-group">
-          <label>Select algorithm: </label>
-          <select
-            value={selectedAlgorithm}
-            onChange={(e) => setSelectedAlgorithm(e.target.value)}
-          >
-            <option value="FIFO">FIFO</option>
-            <option value="SJF">SJF</option>
-            <option value="STCF">STCF</option>
-            <option value="RR">RR</option>
-            <option value="MLFQ">MLFQ</option>
-          </select>
+          <label>Select algorithms: </label>
+          <div>
+            {["FIFO", "SJF", "STCF", "RR", "MLFQ"].map((algorithm) => (
+              <div key={algorithm}>
+                <input
+                  type="checkbox"
+                  name={algorithm}
+                  checked={selectedAlgorithms[algorithm]}
+                  onChange={handleAlgorithmSelection}
+                />
+                <label>{algorithm}</label>
+              </div>
+            ))}
+          </div>
         </div>
-        <button onClick={runAlgorithm}>Run algorithm</button>
+        <button onClick={runAlgorithms}>Run algorithms</button>
       </div>
       <div className="results-container fade-in">
         <h2>Results</h2>
@@ -125,3 +137,5 @@ function App() {
 }
 
 export default App;
+
+
