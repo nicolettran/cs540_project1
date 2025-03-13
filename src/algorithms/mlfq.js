@@ -16,6 +16,7 @@ export const mlfq = (processes) => {
 
   while (remainingProcesses.length > 0 || queues.some((q) => q.processes.length > 0)) {
     // Add processes that have arrived to the appropriate queue
+    // eslint-disable-next-line no-loop-func
     remainingProcesses.forEach((process) => {
       if (process.arrivalTime <= currentTime) {
         queues[process.queueLevel].processes.push(process);

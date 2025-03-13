@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { generateProcesses } from "./utils/processGenerator";
 import { fifo } from "./algorithms/fifo";
 import { sjf } from "./algorithms/sjf";
@@ -6,21 +6,24 @@ import { stcf } from "./algorithms/stcf";
 import { rr } from "./algorithms/rr";
 import { mlfq } from "./algorithms/mlfq";
 import ResultsDisplay from "./components/ResultsDisplay";
+import ProcessChart from "./components/ProcessChart";
 
 function App() {
   const [numProcesses, setNumProcesses] = useState(5);
   const [timeQuantum, setTimeQuantum] = useState(2);
   const [processes, setProcesses] = useState([]);
   const [selectedAlgorithm, setSelectedAlgorithm] = useState("FIFO");
-  const [results, setResults] = useState({});
-  const [allResults, setAllResults] = useState({});
+  const [results, setResults] = useState([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
 
   // Generate random processes
   const handleGenerateProcesses = () => {
     const generatedProcesses = generateProcesses(numProcesses);
     setProcesses(generatedProcesses);
-    setResults({}); // Clear previous results
-    setAllResults({}); // Clear all results
+    setResults([]); // Clear previous results
+    setCurrentTime(0); // Reset time
+    setIsRunning(false); // Stop any running simulation
   };
 
   // Run the selected algorithm
@@ -52,32 +55,31 @@ function App() {
         results = [];
     }
 
-    setResults({ [selectedAlgorithm]: results });
+    setResults(results);
+    setIsRunning(true); // Start the simulation
   };
 
-  // Run all algorithms
-  const runAllAlgorithms = () => {
-    if (processes.length === 0) {
-      alert("Please generate processes first.");
-      return;
+  // Simulate the passage of time
+  useEffect(() => {
+    if (isRunning) {
+      const interval = setInterval(() => {
+        setCurrentTime((prevTime) => prevTime + 1);
+      }, 1000); // Update every second
+
+      // Stop the simulation when all processes are completed
+      if (currentTime >= Math.max(...results.map((result) => result.endTime))) {
+        setIsRunning(false);
+      }
+
+      return () => clearInterval(interval);
     }
-
-    const allResults = {
-      FIFO: fifo([...processes]),
-      SJF: sjf([...processes]),
-      STCF: stcf([...processes]),
-      RR: rr([...processes], timeQuantum),
-      MLFQ: mlfq([...processes]),
-    };
-
-    setAllResults(allResults);
-  };
+  }, [isRunning, currentTime, results]);
 
   return (
     <div>
       <h1>CPU Scheduling Simulator</h1>
       <div>
-        <label>Number of Processes: </label>
+        <label>Number of processes: </label>
         <input
           type="number"
           value={numProcesses}
@@ -92,9 +94,9 @@ function App() {
           onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
         />
       </div>
-      <button onClick={handleGenerateProcesses}>Generate Processes</button>
+      <button onClick={handleGenerateProcesses}>Generate processes</button>
       <div>
-        <label>Select Algorithm: </label>
+        <label>Select algorithm: </label>
         <select
           value={selectedAlgorithm}
           onChange={(e) => setSelectedAlgorithm(e.target.value)}
@@ -105,26 +107,16 @@ function App() {
           <option value="RR">RR</option>
           <option value="MLFQ">MLFQ</option>
         </select>
-        <button onClick={runAlgorithm}>Run Algorithm</button>
-        <button onClick={runAllAlgorithms}>Run All Algorithms</button>
+        <button onClick={runAlgorithm}>Run algorithm</button>
       </div>
-      {Object.keys(results).length > 0 && (
-        <div>
-          <h2>{selectedAlgorithm} Results</h2>
-          <ResultsDisplay results={results[selectedAlgorithm]} />
-        </div>
-      )}
-      {Object.keys(allResults).length > 0 && (
-        <div>
-          <h2>All Algorithms Results</h2>
-          {Object.entries(allResults).map(([algorithm, results]) => (
-            <div key={algorithm}>
-              <h3>{algorithm}</h3>
-              <ResultsDisplay results={results} />
-            </div>
-          ))}
-        </div>
-      )}
+      <div>
+        <h2>Simulation</h2>
+        <ProcessChart processes={results} currentTime={currentTime} />
+      </div>
+      <div>
+        <h2>Results</h2>
+        <ResultsDisplay results={results} />
+      </div>
     </div>
   );
 }

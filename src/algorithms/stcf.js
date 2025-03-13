@@ -9,6 +9,7 @@ export const stcf = (processes) => {
   while (remainingProcesses.length > 0) {
     // Filter processes that have arrived
     const availableProcesses = remainingProcesses.filter(
+      // eslint-disable-next-line no-loop-func
       (process) => process.arrivalTime <= currentTime
     );
 
