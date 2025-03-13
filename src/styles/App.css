@@ -1,38 +1,153 @@
-.App {
+/* General layout styles */
+.app-container {
+  display: grid;
+  grid-template-rows: auto 1fr; /* Top row for title and inputs/results, bottom row for simulation */
+  grid-template-columns: 1fr 3fr; /* Inputs take up a quarter (1fr) and Results take up more space (3fr) */
+  grid-template-areas:
+    "title title"
+    "inputs results"
+    "simulation simulation";
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  width: 70%;
+  margin: 0 auto;
+  height: 100vh;
+}
+
+/* Title style */
+h1 {
+  font-size: 1.2rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  grid-column: 1 / -1; /* Make the title span both columns */
+}
+
+/* Input section */
+.inputs-container {
+  grid-area: inputs;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  gap: 10px;
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px; /* Increased margin to space out inputs */
+  min-width: 80px;
+}
+
+.input-group label {
+  font-size: 0.8rem; /* Smaller label text */
+  margin-bottom: 5px;
+}
+
+input, select, button {
+  padding: 5px;
+  font-size: 0.8rem; /* Smaller input and button text */
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 70%; /* Smaller width */
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+button {
+  background-color: #a1c9f7;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+button:hover {
+  background-color: #5c9fe7;
+  color: rgb(222, 231, 245);
+}
+
+/* Results Table */
+.results-container {
+  grid-area: results;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow-y: auto;
+}
+
+.results-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-container table th,
+.results-container table td {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.85rem; /* Smaller font size for table */
+}
+
+.results-container table th {
+  background-color: #f2f2f2;
+}
+
+h2 {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Styling for process chart */
+.animation-container {
+  grid-area: simulation;
+  margin-top: 20px;
+  opacity: 0; /* Initially hidden */
+  animation: slideIn 1s forwards 2s;
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* General styling for other sections */
+.input-container, .results-container {
+  margin-bottom: 10px;
 }
 
-.App-link {
-  color: #61dafb;
+/* Input and result container spacing */
+.inputs-container {
+  width: 80%;
+  padding: 0;
+  margin: 0;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Simulation Chart */
+.animation-container canvas {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+}
+
+
+.app-container {
+  background-color: transparent;
+  box-shadow: none; 
 }

@@ -5,7 +5,6 @@ export const sjf = (processes) => {
   while (processes.length > 0) {
     // Filter processes that have arrived
     const availableProcesses = processes.filter(
-      // eslint-disable-next-line no-loop-func
       (process) => process.arrivalTime <= currentTime
     );
 

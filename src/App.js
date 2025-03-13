@@ -7,6 +7,7 @@ import { rr } from "./algorithms/rr";
 import { mlfq } from "./algorithms/mlfq";
 import ResultsDisplay from "./components/ResultsDisplay";
 import ProcessChart from "./components/ProcessChart";
+import "./styles/App.css"; // Import the CSS file
 
 function App() {
   const [numProcesses, setNumProcesses] = useState(5);
@@ -76,46 +77,48 @@ function App() {
   }, [isRunning, currentTime, results]);
 
   return (
-    <div>
-      <h1>CPU Scheduling Simulator</h1>
-      <div>
-        <label>Number of processes: </label>
-        <input
-          type="number"
-          value={numProcesses}
-          onChange={(e) => setNumProcesses(parseInt(e.target.value))}
-        />
-      </div>
-      <div>
-        <label>Time Quantum (for RR): </label>
-        <input
-          type="number"
-          value={timeQuantum}
-          onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
-        />
-      </div>
-      <button onClick={handleGenerateProcesses}>Generate processes</button>
-      <div>
-        <label>Select algorithm: </label>
-        <select
-          value={selectedAlgorithm}
-          onChange={(e) => setSelectedAlgorithm(e.target.value)}
-        >
-          <option value="FIFO">FIFO</option>
-          <option value="SJF">SJF</option>
-          <option value="STCF">STCF</option>
-          <option value="RR">RR</option>
-          <option value="MLFQ">MLFQ</option>
-        </select>
+    <div className="app-container">
+      <h1 className="fade-in">CPU Scheduling Simulator</h1>
+      <div className="input-container slide-in">
+        <div className="input-group">
+          <label>Number of processes: </label>
+          <input
+            type="number"
+            value={numProcesses}
+            onChange={(e) => setNumProcesses(parseInt(e.target.value))}
+          />
+        </div>
+        <div className="input-group">
+          <label>Time Quantum (for RR): </label>
+          <input
+            type="number"
+            value={timeQuantum}
+            onChange={(e) => setTimeQuantum(parseInt(e.target.value))}
+          />
+        </div>
+        <button onClick={handleGenerateProcesses}>Generate processes</button>
+        <div className="input-group">
+          <label>Select algorithm: </label>
+          <select
+            value={selectedAlgorithm}
+            onChange={(e) => setSelectedAlgorithm(e.target.value)}
+          >
+            <option value="FIFO">FIFO</option>
+            <option value="SJF">SJF</option>
+            <option value="STCF">STCF</option>
+            <option value="RR">RR</option>
+            <option value="MLFQ">MLFQ</option>
+          </select>
+        </div>
         <button onClick={runAlgorithm}>Run algorithm</button>
       </div>
-      <div>
-        <h2>Simulation</h2>
-        <ProcessChart processes={results} currentTime={currentTime} />
-      </div>
-      <div>
+      <div className="results-container fade-in">
         <h2>Results</h2>
         <ResultsDisplay results={results} />
+      </div>
+      <div className="animation-container slide-in">
+        <h2>Simulation</h2>
+        <ProcessChart processes={results} currentTime={currentTime} />
       </div>
     </div>
   );

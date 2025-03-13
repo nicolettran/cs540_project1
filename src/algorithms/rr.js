@@ -9,7 +9,6 @@ export const rr = (processes, timeQuantum) => {
 
   while (remainingProcesses.length > 0 || queue.length > 0) {
     // Add processes that have arrived to the queue
-    // eslint-disable-next-line no-loop-func
     remainingProcesses.forEach((process) => {
       if (process.arrivalTime <= currentTime) {
         queue.push(process);
