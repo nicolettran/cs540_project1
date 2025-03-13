@@ -3,7 +3,8 @@ import InputForm from "./components/InputForm";
 import AlgorithmSelector from "./components/AlgorithmSelector";
 import ResultsDisplay from "./components/ResultsDisplay";
 import { fifo } from "./algorithms/fifo";
-import { sjf } from "./algorithms/sjf"; // Import SJF function
+import { sjf } from "./algorithms/sjf";
+import { stcf } from "./algorithms/stcf";
 
 function App() {
   const [processes, setProcesses] = useState([]);
@@ -14,6 +15,7 @@ function App() {
       id: i + 1,
       arrivalTime: Math.floor(Math.random() * 10),
       burstTime: Math.floor(Math.random() * 10) + 1,
+      remainingBurstTime: Math.floor(Math.random() * 10) + 1, // Add remaining burst time for STCF
     }));
 
     newProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
@@ -22,12 +24,15 @@ function App() {
   };
 
   const handleSelectAlgorithm = (algorithm) => {
+    console.log(processes); // Log the processes to ensure they are generated correctly
     let computedResults = [];
 
     if (algorithm === "FIFO") {
       computedResults = fifo(processes);
     } else if (algorithm === "SJF") {
-      computedResults = sjf(processes); // Use SJF function
+      computedResults = sjf(processes);
+    } else if (algorithm === "STCF") {
+      computedResults = stcf(processes);
     }
 
     setResults(computedResults);

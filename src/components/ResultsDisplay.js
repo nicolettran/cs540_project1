@@ -15,9 +15,9 @@ const ResultsDisplay = ({ results }) => {
             </tr>
           </thead>
           <tbody>
-            {results.map((process, index) => (
-              <tr key={index}>
-                <td>P{index + 1}</td>
+            {results.map((process) => (
+              <tr key={process.id}>
+                <td>{`P${process.id}`}</td> {/* Using process.id instead of index */}
                 <td>{process.arrivalTime}</td>
                 <td>{process.burstTime}</td>
                 <td>{process.completionTime}</td>
