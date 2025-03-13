@@ -1,10 +1,11 @@
+// ResultsDisplay.js
 import React from "react";
 
 const ResultsDisplay = ({ results }) => {
   return (
     <div>
       <h3>Scheduling Results</h3>
-      {results.length > 0 ? (
+      {results && results.length > 0 ? (
         <table border="1">
           <thead>
             <tr>
@@ -17,7 +18,7 @@ const ResultsDisplay = ({ results }) => {
           <tbody>
             {results.map((process) => (
               <tr key={process.id}>
-                <td>{`P${process.id}`}</td> {/* Using process.id instead of index */}
+                <td>{`P${process.id}`}</td>
                 <td>{process.arrivalTime}</td>
                 <td>{process.burstTime}</td>
                 <td>{process.completionTime}</td>

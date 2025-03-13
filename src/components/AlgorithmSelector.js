@@ -16,3 +16,4 @@ const AlgorithmSelector = ({ onSelectAlgorithm }) => {
 };
 
 export default AlgorithmSelector;
+

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
 const InputForm = ({ onSubmit }) => {
-  const [numProcesses, setNumProcesses] = useState(5);
+  const [numProcesses, setNumProcesses] = useState(5); // Corrected variable name
   const [timeQuantum, setTimeQuantum] = useState(2); // Only used for RR
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ numProcesses, timeQuantum });
+    onSubmit({ numProcesses, timeQuantum }); // Pass the correct variable name
   };
 
   return (
@@ -16,7 +16,7 @@ const InputForm = ({ onSubmit }) => {
         <input
           type="number"
           value={numProcesses}
-          onChange={(e) => setNumProcesses(e.target.value)}
+          onChange={(e) => setNumProcesses(parseInt(e.target.value, 10))} // Ensure it's a number
           min="1"
         />
       </label>
@@ -26,7 +26,7 @@ const InputForm = ({ onSubmit }) => {
         <input
           type="number"
           value={timeQuantum}
-          onChange={(e) => setTimeQuantum(e.target.value)}
+          onChange={(e) => setTimeQuantum(parseInt(e.target.value, 10))} // Ensure it's a number
           min="1"
         />
       </label>
@@ -37,3 +37,4 @@ const InputForm = ({ onSubmit }) => {
 };
 
 export default InputForm;
+
