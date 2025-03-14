@@ -4,43 +4,63 @@ export const rr = (processes, timeQuantum) => {
   const queue = [];
   const remainingProcesses = processes.map((process) => ({
     ...process,
-    remainingTime: process.burstTime,
+    remainingTime: process.burstTime, // Track remaining burst time
+    waitingTime: 0,                   // Track waiting time
+    startTime: null,                  // Track start time
   }));
 
+  // While there are processes remaining to be scheduled or queue is not empty
   while (remainingProcesses.length > 0 || queue.length > 0) {
-    // Add processes that have arrived to the queue
-    remainingProcesses.forEach((process) => {
-      if (process.arrivalTime <= currentTime) {
-        queue.push(process);
-        remainingProcesses.splice(remainingProcesses.indexOf(process), 1);
+    // Add all processes that have arrived up to the current time to the queue
+    for (let i = 0; i < remainingProcesses.length; i++) {
+      if (remainingProcesses[i].arrivalTime <= currentTime) {
+        queue.push(remainingProcesses[i]);
+        remainingProcesses.splice(i, 1);
+        i--; // Adjust index after splicing
       }
-    });
+    }
 
+    // If no processes are in the queue, jump forward to the next process arrival time
     if (queue.length === 0) {
-      // No processes in the queue, increment time
-      currentTime++;
+      if (remainingProcesses.length > 0) {
+        currentTime = remainingProcesses[0].arrivalTime;
+      }
       continue;
     }
 
+    // Get the next process from the queue
     const nextProcess = queue.shift();
-    const startTime = currentTime;
-    const executionTime = Math.min(timeQuantum, nextProcess.remainingTime);
-    const endTime = startTime + executionTime;
-    nextProcess.remainingTime -= executionTime;
-    currentTime = endTime;
 
+    // Set start time if not already set (first time it's executing)
+    if (nextProcess.startTime === null) {
+      nextProcess.startTime = currentTime;
+    }
+
+    // Calculate execution time (either the time quantum or the remaining time of the process)
+    const executionTime = Math.min(timeQuantum, nextProcess.remainingTime);
+    nextProcess.remainingTime -= executionTime;
+    currentTime += executionTime; // Update the current time
+
+    // If the process has finished, record the end time
     if (nextProcess.remainingTime === 0) {
-      // Process completed
-      results.push({
-        ...nextProcess,
-        startTime,
-        endTime,
-      });
+      nextProcess.endTime = currentTime;
+      results.push({ ...nextProcess });
     } else {
-      // Re-add the process to the queue
+      // If the process is not finished, add it back to the queue for the next cycle
       queue.push(nextProcess);
     }
+
+    // Update waiting times for all processes in the queue (they waited for executionTime)
+    queue.forEach((process) => {
+      process.waitingTime += executionTime;
+    });
   }
+
+  // Calculate the final turnaround time and waiting time after all processes finish
+  results.forEach((process) => {
+    process.turnaroundTime = process.endTime - process.arrivalTime;
+    process.waitingTime = process.turnaroundTime - process.burstTime;
+  });
 
   return results;
 };

@@ -36,7 +36,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
         </div>
       )}
 
-      {/* Show "Please choose any algorithms to run" after processes are generated */}
+      {/* Show "Please choose any algorithm to run" after processes are generated */}
       {processesGenerated && results.length === 0 && dots === "." && (
         <div>Please choose any algorithm to run.</div>
       )}

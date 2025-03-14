@@ -148,7 +148,7 @@ function App() {
         <div className="loading-message">{loadingMessage}</div>
         {/* Show the "Please choose any algorithms to run" message */}
         {showChooseAlgorithmsMessage && !results.length && (
-          <div className="loading-message">Please choose any algorithms to run.</div>
+          <div className="loading-message">Please choose any algorithm to run.</div>
         )}
         {/* Show ResultsDisplay only when results exist */}
         {results.length > 0 && <ResultsDisplay results={results} />}
