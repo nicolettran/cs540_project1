@@ -5,6 +5,7 @@ export const stcf = (processes) => {
     ...process,
     remainingTime: process.burstTime,
     startTime: null,
+    state: "inQueue", // Initial state: all processes are in the queue
   }));
 
   while (remainingProcesses.length > 0) {
@@ -29,12 +30,22 @@ export const stcf = (processes) => {
       nextProcess.startTime = currentTime;
     }
 
+    // Mark the process as running
+    nextProcess.state = "running";
+
     // Simulate 1 unit of time for the selected process
     nextProcess.remainingTime -= 1;
     currentTime++;
 
+    // Mark other available processes as in queue
+    availableProcesses.forEach((process) => {
+      if (process !== nextProcess && process.state !== "completed") {
+        process.state = "inQueue";
+      }
+    });
+
     if (nextProcess.remainingTime === 0) {
-      // Process completed, record its end time and remove it from the list
+      // Process completed, record its end time and waiting time
       const endTime = currentTime;
       const waitingTime = endTime - nextProcess.arrivalTime - nextProcess.burstTime;
 
@@ -42,12 +53,16 @@ export const stcf = (processes) => {
         ...nextProcess,
         endTime,
         waitingTime,
+        state: "completed", // Mark the process as completed
       });
 
+      // Remove the completed process from the list
       remainingProcesses.splice(remainingProcesses.indexOf(nextProcess), 1);
+    } else {
+      // If the process is preempted, mark it as preempted
+      nextProcess.state = "preempted";
     }
   }
 
   return results;
 };
-

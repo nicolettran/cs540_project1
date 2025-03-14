@@ -26,10 +26,16 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
       <h3>Process Gantt Charts</h3>
       <div className="gantt-container">
         {processes.map((processGroup) => {
+          // Sort processes by processId for the chart
+          const sortedProcesses = [...processGroup.result].sort((a, b) => a.processId - b.processId);
+
+          // Reverse the order of processes to display 1 at the bottom and 5 at the top
+          const reversedProcesses = [...sortedProcesses].reverse();
+
           // Prepare the dataset for the current algorithm's Gantt chart
           const dataset = {
             label: processGroup.name, // The algorithm name
-            data: processGroup.result.map((process) => ({
+            data: reversedProcesses.map((process) => ({
               y: process.processId, // Process ID on the Y axis (just the number)
               x: [process.startTime, process.endTime], // Start and end time on the X axis
               backgroundColor: "rgba(75, 192, 192, 0.6)", // Color for bars
@@ -39,7 +45,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
 
           // Prepare the data for the chart
           const data = {
-            labels: processGroup.result.map((process) => process.processId.toString()), // Only numbers
+            labels: reversedProcesses.map((process) => process.processId.toString()), // Only numbers
             datasets: [dataset],
           };
 
@@ -70,6 +76,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                   display: true,
                   text: "Process ID", // Added y-axis label
                 },
+                reverse: false, // Ensure the y-axis is not reversed (1 at the bottom, 5 at the top)
               },
             },
           };

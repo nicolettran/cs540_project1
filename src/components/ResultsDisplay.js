@@ -15,7 +15,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
             return ".";
           }
         });
-      }, 500);
+      }, 250);
 
       // Clear the interval after 3 dots
       return () => clearInterval(dotInterval);
@@ -57,8 +57,8 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
               </tr>
             </thead>
             <tbody>
-              {algorithmResult.result.map((result) => (
-                <tr key={result.processId}>
+              {algorithmResult.result.map((result, index) => (
+                <tr key={index}> {/* Use index to maintain execution order */}
                   <td>{result.processId}</td>
                   <td>{result.arrivalTime}</td>
                   <td>{result.burstTime}</td>
@@ -76,4 +76,3 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
 };
 
 export default ResultsDisplay;
-

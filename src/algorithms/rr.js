@@ -1,66 +1,61 @@
 export const rr = (processes, timeQuantum) => {
-  let currentTime = 0;
-  const results = [];
-  const queue = [];
-  const remainingProcesses = processes.map((process) => ({
-    ...process,
-    remainingTime: process.burstTime, // Track remaining burst time
-    waitingTime: 0,                   // Track waiting time
-    startTime: null,                  // Track start time
+  let currentTime = 0; // Tracks the total time elapsed
+  let queue = []; // Ready queue
+  let results = []; // Final results array
+
+  // Initialize remaining time, waiting time, and other fields for each process
+  let remainingProcesses = processes.map((p) => ({
+    ...p,
+    remainingTime: p.burstTime, // Initialize remaining burst time
+    startTime: null,
+    endTime: 0,
+    waitingTime: 0,
+    turnaroundTime: 0,
   }));
 
-  // While there are processes remaining to be scheduled or queue is not empty
-  while (remainingProcesses.length > 0 || queue.length > 0) {
-    // Add all processes that have arrived up to the current time to the queue
-    for (let i = 0; i < remainingProcesses.length; i++) {
-      if (remainingProcesses[i].arrivalTime <= currentTime) {
-        queue.push(remainingProcesses[i]);
-        remainingProcesses.splice(i, 1);
-        i--; // Adjust index after splicing
-      }
+  // Sort processes by arrival time
+  remainingProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
+  let index = 0; // Keeps track of the index of the next process to arrive
+
+  while (queue.length > 0 || index < remainingProcesses.length) {
+    // Add processes that have arrived to the queue
+    while (index < remainingProcesses.length && remainingProcesses[index].arrivalTime <= currentTime) {
+      queue.push(remainingProcesses[index]);
+      index++;
     }
 
-    // If no processes are in the queue, jump forward to the next process arrival time
     if (queue.length === 0) {
-      if (remainingProcesses.length > 0) {
-        currentTime = remainingProcesses[0].arrivalTime;
+      // If no process is ready, jump to the next arrival
+      if (index < remainingProcesses.length) {
+        currentTime = remainingProcesses[index].arrivalTime;
       }
       continue;
     }
 
-    // Get the next process from the queue
-    const nextProcess = queue.shift();
+    let process = queue.shift(); // Pick the first process in the queue
 
-    // Set start time if not already set (first time it's executing)
-    if (nextProcess.startTime === null) {
-      nextProcess.startTime = currentTime;
+    // Record the start time if it hasn't been set yet
+    if (process.startTime === null) {
+      process.startTime = currentTime;
     }
 
-    // Calculate execution time (either the time quantum or the remaining time of the process)
-    const executionTime = Math.min(timeQuantum, nextProcess.remainingTime);
-    nextProcess.remainingTime -= executionTime;
-    currentTime += executionTime; // Update the current time
+    // Calculate the execution time as the minimum between time quantum and remaining burst time
+    let executionTime = Math.min(timeQuantum, process.remainingTime);
+    process.remainingTime -= executionTime;
+    currentTime += executionTime;
 
-    // If the process has finished, record the end time
-    if (nextProcess.remainingTime === 0) {
-      nextProcess.endTime = currentTime;
-      results.push({ ...nextProcess });
+    // If the process has finished
+    if (process.remainingTime === 0) {
+      process.endTime = currentTime;
+      process.turnaroundTime = process.endTime - process.arrivalTime;
+      process.waitingTime = process.turnaroundTime - process.burstTime;
+      results.push(process);
     } else {
-      // If the process is not finished, add it back to the queue for the next cycle
-      queue.push(nextProcess);
+      // Re-add the process to the queue if it isn't finished
+      queue.push(process);
     }
-
-    // Update waiting times for all processes in the queue (they waited for executionTime)
-    queue.forEach((process) => {
-      process.waitingTime += executionTime;
-    });
   }
-
-  // Calculate the final turnaround time and waiting time after all processes finish
-  results.forEach((process) => {
-    process.turnaroundTime = process.endTime - process.arrivalTime;
-    process.waitingTime = process.turnaroundTime - process.burstTime;
-  });
 
   return results;
 };
