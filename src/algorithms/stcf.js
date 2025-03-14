@@ -4,6 +4,8 @@ export const stcf = (processes) => {
   const remainingProcesses = processes.map((process) => ({
     ...process,
     remainingTime: process.burstTime,
+    startTime: null,
+    totalWaitTime: 0, // Track total waiting time
   }));
 
   while (remainingProcesses.length > 0) {
@@ -23,24 +25,31 @@ export const stcf = (processes) => {
       curr.remainingTime < prev.remainingTime ? curr : prev
     );
 
-    const startTime = currentTime;
-    const endTime = startTime + 1; // Simulate 1 unit of time
+    // If the process hasn't started yet, assign its start time
+    if (nextProcess.startTime === null) {
+      nextProcess.startTime = currentTime;
+    }
+
+    // If the process is not being executed at this moment, increment the wait time
+    if (nextProcess.startTime !== currentTime) {
+      nextProcess.totalWaitTime++;
+    }
+
+    // Simulate 1 unit of time for the selected process
     nextProcess.remainingTime -= 1;
-    currentTime = endTime;
+    currentTime++;
 
     if (nextProcess.remainingTime === 0) {
-      // Process completed
+      // Process completed, record its end time and remove it from the list
       results.push({
         ...nextProcess,
-        startTime,
         endTime: currentTime,
+        waitingTime: nextProcess.totalWaitTime, // Record the total waiting time
       });
-      // Remove the completed process
       remainingProcesses.splice(remainingProcesses.indexOf(nextProcess), 1);
     }
   }
 
   return results;
 };
-  
-  
+

@@ -38,7 +38,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
 
       {/* Show "Please choose any algorithms to run" after processes are generated */}
       {processesGenerated && results.length === 0 && dots === "." && (
-        <div>Please choose any algorithms to run.</div>
+        <div>Please choose any algorithm to run.</div>
       )}
 
       {/* Show the results if available */}
@@ -53,6 +53,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
                 <th>Burst Time</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th>Waiting Time</th> {/* Add Waiting Time column */}
               </tr>
             </thead>
             <tbody>
@@ -63,6 +64,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
                   <td>{result.burstTime}</td>
                   <td>{result.startTime}</td>
                   <td>{result.endTime}</td>
+                  <td>{result.waitingTime}</td> {/* Display Waiting Time */}
                 </tr>
               ))}
             </tbody>
@@ -74,3 +76,4 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
 };
 
 export default ResultsDisplay;
+

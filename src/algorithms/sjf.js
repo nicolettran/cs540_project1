@@ -2,6 +2,9 @@ export const sjf = (processes) => {
   let currentTime = 0;
   const results = [];
 
+  // Sort processes by arrival time to ensure we always check the earliest arrival first
+  processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+
   while (processes.length > 0) {
     // Filter processes that have arrived
     const availableProcesses = processes.filter(
@@ -9,8 +12,8 @@ export const sjf = (processes) => {
     );
 
     if (availableProcesses.length === 0) {
-      // No processes available, increment time
-      currentTime++;
+      // If no processes have arrived, move time forward to the next process's arrival time
+      currentTime = Math.min(...processes.map((p) => p.arrivalTime));
       continue;
     }
 
@@ -23,7 +26,9 @@ export const sjf = (processes) => {
     const endTime = startTime + nextProcess.burstTime;
     currentTime = endTime;
 
-    results.push({ ...nextProcess, startTime, endTime });
+    const waitingTime = startTime - nextProcess.arrivalTime; // Waiting time calculation
+
+    results.push({ ...nextProcess, startTime, endTime, waitingTime });
 
     // Remove the scheduled process from the list
     processes = processes.filter(
@@ -33,5 +38,3 @@ export const sjf = (processes) => {
 
   return results;
 };
-  
-  
