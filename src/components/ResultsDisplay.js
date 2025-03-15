@@ -15,7 +15,7 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
             return ".";
           }
         });
-      }, 250);
+      }, 500);
 
       // Clear the interval after 3 dots
       return () => clearInterval(dotInterval);

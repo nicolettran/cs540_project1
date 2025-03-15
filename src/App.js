@@ -33,7 +33,7 @@ function App() {
     const loadingInterval = setInterval(() => {
       setLoadingMessage("Generating processes" + ".".repeat(dots)); // Append dots based on the current value of `dots`
       dots = (dots + 1) % 4; // Cycle through 0, 1, 2, 3
-    }, 250); // Update every 500ms
+    }, 500); // Update every 500ms
 
     const generatedProcesses = generateProcesses(numProcesses);
     setProcesses(generatedProcesses);

@@ -1,58 +1,77 @@
 export const rr = (processes, timeQuantum) => {
-  let currentTime = 0; // Tracks the total time elapsed
+  let currentTime = 0; // Tracks total time elapsed
   let queue = []; // Ready queue
   let results = []; // Final results array
 
-  // Initialize remaining time, waiting time, and other fields for each process
+  // Initialize process tracking
   let remainingProcesses = processes.map((p) => ({
     ...p,
-    remainingTime: p.burstTime, // Initialize remaining burst time
+    remainingTime: p.burstTime,
     startTime: null,
-    endTime: 0,
+    endTime: null,
     waitingTime: 0,
     turnaroundTime: 0,
+    lastCompletionTime: 0, // Track when a process last finished executing
   }));
 
   // Sort processes by arrival time
   remainingProcesses.sort((a, b) => a.arrivalTime - b.arrivalTime);
 
-  let index = 0; // Keeps track of the index of the next process to arrive
+  let index = 0; // Track next process to arrive
 
+  // Add initial processes arriving at time 0
+  while (index < remainingProcesses.length && remainingProcesses[index].arrivalTime <= currentTime) {
+    queue.push(remainingProcesses[index]);
+    index++;
+  }
+
+  // Main scheduling loop
   while (queue.length > 0 || index < remainingProcesses.length) {
-    // Add processes that have arrived to the queue
+    if (queue.length === 0) {
+      // Jump to next arriving process if queue is empty
+      currentTime = remainingProcesses[index].arrivalTime;
+      while (index < remainingProcesses.length && remainingProcesses[index].arrivalTime <= currentTime) {
+        queue.push(remainingProcesses[index]);
+        index++;
+      }
+      continue;
+    }
+
+    let process = queue.shift();
+
+    // Calculate waiting time correctly
+    if (process.startTime === null) {
+      process.waitingTime = currentTime - process.arrivalTime;
+    } else {
+      process.waitingTime += currentTime - process.lastCompletionTime;
+    }
+
+    // Set start time only the first time it runs
+    if (process.startTime === null) {
+      process.startTime = currentTime;
+    }
+
+    // Execution time
+    let executionTime = Math.min(timeQuantum, process.remainingTime);
+    process.remainingTime -= executionTime;
+    currentTime += executionTime;
+    
+    // Update the completion time
+    process.lastCompletionTime = currentTime;
+
+    // Add new arrivals during execution **before re-adding current process**
     while (index < remainingProcesses.length && remainingProcesses[index].arrivalTime <= currentTime) {
       queue.push(remainingProcesses[index]);
       index++;
     }
 
-    if (queue.length === 0) {
-      // If no process is ready, jump to the next arrival
-      if (index < remainingProcesses.length) {
-        currentTime = remainingProcesses[index].arrivalTime;
-      }
-      continue;
-    }
-
-    let process = queue.shift(); // Pick the first process in the queue
-
-    // Record the start time if it hasn't been set yet
-    if (process.startTime === null) {
-      process.startTime = currentTime;
-    }
-
-    // Calculate the execution time as the minimum between time quantum and remaining burst time
-    let executionTime = Math.min(timeQuantum, process.remainingTime);
-    process.remainingTime -= executionTime;
-    currentTime += executionTime;
-
-    // If the process has finished
     if (process.remainingTime === 0) {
+      // Process is completed
       process.endTime = currentTime;
       process.turnaroundTime = process.endTime - process.arrivalTime;
-      process.waitingTime = process.turnaroundTime - process.burstTime;
       results.push(process);
     } else {
-      // Re-add the process to the queue if it isn't finished
+      // Re-add to queue **after** processing new arrivals
       queue.push(process);
     }
   }
