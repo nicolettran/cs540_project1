@@ -71,8 +71,8 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                   x: [segment.startTime, segment.endTime],
                   y: `${displayId}`
                 })),
-                barPercentage: 4,
-                categoryPercentage: 1,
+                barPercentage: 6,
+                categoryPercentage: .4,
               });
             });
           } else {
@@ -89,8 +89,8 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                   x: [process.startTime, process.endTime], 
                   y: `${displayId}` 
                 }],
-                barPercentage: 4,
-                categoryPercentage: 1,
+                barPercentage: 6,
+                categoryPercentage: .4,
               });
             });
           }

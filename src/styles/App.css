@@ -1,192 +1,211 @@
 /* General layout styles */
 .app-container {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    grid-template-columns: 1fr 3fr;
-    grid-template-areas:
-      "title title"
-      "inputs results"
-      "simulation simulation";
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    width: 70%;
-    margin: 0 auto;
-    height: 100vh;
-  }
-  
-  /* Title style */
-  h1 {
-    font-size: 1.5rem;
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-    grid-column: 1 / -1;
-  }
-  
-  /* Input section */
-  .input-container {
-    grid-area: inputs;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .input-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 15px;
-  }
-  
-  .input-group label {
-    font-size: 0.8rem;
-    margin-bottom: 5px;
-  }
-  
-  input,
-  select,
-  button {
-    padding: 5px;
-    font-size: 0.8rem;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 100%;
-    text-align: center;
-  }
-  
-  button {
-    background-color: #a1c9f7;
-    color: rgb(0, 0, 0);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 10px;
-  }
-  
-  button:hover {
-    background-color: #5c9fe7;
-    color: rgb(222, 231, 245);
-  }
-  
-  /* Checkbox styling */
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 8px; /* Adds space between checkbox and label */
-    margin-bottom: 10px;
-  }
-  
-  .checkbox-group input {
-    margin: 0;
-    width: auto;
-  }
-  
-  .checkbox-group label {
-    margin: 0;
-    font-size: 0.8rem;
-    white-space: nowrap;
-  }
-  
-  /* Results Table */
-  .results-container {
-    grid-area: results;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    overflow-y: auto;
-  }
-  
-  .results-container table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .results-container table th,
-  .results-container table td {
-    padding: 6px;
-    text-align: center;
-    border: 1px solid #ddd;
-    font-size: 0.85rem;
-  }
-  
-  .results-container table th {
-    background-color: #f2f2f2;
-  }
-  
-  h2 {
-    font-size: 1.2rem;
-    color: #333;
-    margin-bottom: 10px;
-  }
-  
-  /* Styling for process chart */
-  .animation-container {
-    grid-area: simulation;
-    margin-top: 20px;
-    opacity: 0;
-    animation: slideIn 1s forwards 2s;
-  }
-  
-  @keyframes slideIn {
-    0% {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 3fr;
+  grid-template-areas:
+    "title title"
+    "inputs results"
+    "simulation simulation";
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  width: 70%;
+  margin: 0 auto;
+  height: 100vh;
+}
+
+/* Title style */
+h1 {
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  grid-column: 1 / -1;
+}
+
+/* Input section */
+.input-container {
+  grid-area: inputs;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+}
+
+input,
+select,
+button {
+  padding: 5px;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  text-align: center;
+}
+
+button {
+  background-color: #a1c9f7;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+button:hover {
+  background-color: #5c9fe7;
+  color: rgb(222, 231, 245);
+}
+
+/* Checkbox styling */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Adds space between checkbox and label */
+  margin-bottom: 10px;
+}
+
+.checkbox-group input {
+  margin: 0;
+  width: auto;
+}
+
+.checkbox-group label {
+  margin: 0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Results Table */
+.results-container {
+  grid-area: results;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow-y: auto;
+}
+
+.results-container table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.results-container table th,
+.results-container table td {
+  padding: 6px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.85rem;
+}
+
+.results-container table th {
+  background-color: #f2f2f2;
+}
+
+h2 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+/* Apply input button styling to the Results Table button */
+.results-container button {
+  background-color: #a1c9f7;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 5px;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 25%;
+  text-align: center;
+}
+
+.results-container button:hover {
+  background-color: #5c9fe7;
+  color: rgb(222, 231, 245);
+}
+
+/* Styling for process chart */
+.animation-container {
+  grid-area: simulation;
+  margin-top: 20px;
+  opacity: 0;
+  animation: slideIn 1s forwards 2s;
+}
+
+@keyframes slideIn {
+  0% {
       opacity: 0;
       transform: translateX(-50px);
-    }
-    100% {
+  }
+  100% {
       opacity: 1;
       transform: translateX(0);
-    }
   }
-  
-  /* General styling for other sections */
-  .input-container,
-  .results-container {
-    margin-bottom: 10px;
-  }
-  
-  /* Simulation Chart */
-  .animation-container canvas {
-    max-width: 100%;
-    height: auto;
-    max-height: 400px;
-  }
-  
-  .app-container {
-    background-color: transparent;
-    box-shadow: none;
-  }
-  
-  .gantt-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px; /* Space between charts */
-    justify-content: center;
-  }
-  
-  .gantt-chart {
-    width: 45%; /* Each chart takes about half the width */
-    min-width: 300px; /* Prevents it from getting too small */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #f9f9f9; /* Light background for visibility */
-    padding: 10px; /* Reduced padding */
-    border-radius: 8px;
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .chart-wrapper {
-    width: 100%; /* Make the chart take up the full width of its container */
-    height: 90%; /* Increase the height of the chart */
-    margin: 0; /* Remove margin */
-    padding: 0; /* Remove padding */
-  }
-  
-  .gantt-algo-title {
-    font-size: 1rem; /* Slightly larger title */
-    margin-bottom: 8px; /* Space between title and chart */
-  }
-  
+}
+
+/* General styling for other sections */
+.input-container,
+.results-container {
+  margin-bottom: 10px;
+}
+
+/* Simulation Chart */
+.animation-container canvas {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+}
+
+.app-container {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.gantt-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Space between charts */
+  justify-content: center;
+}
+
+.gantt-chart {
+  width: 45%; /* Each chart takes about half the width */
+  min-width: 300px; /* Prevents it from getting too small */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f9f9f9; /* Light background for visibility */
+  padding: 10px; /* Reduced padding */
+  border-radius: 8px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-wrapper {
+  width: 100%; /* Make the chart take up the full width of its container */
+  height: 90%; /* Increase the height of the chart */
+  margin: 0; /* Remove margin */
+  padding: 0; /* Remove padding */
+}
+
+.gantt-algo-title {
+  font-size: 1rem; /* Slightly larger title */
+  margin-bottom: 8px; /* Space between title and chart */
+}
