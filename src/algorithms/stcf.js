@@ -5,8 +5,8 @@ export const stcf = (processes) => {
     ...process,
     remainingTime: process.burstTime,
     startTime: null,
-    segments: [], // Use 'segments' instead of 'executionSegments'
-    lastStartTime: null,   // Track when the process last started execution
+    segments: [],
+    lastStartTime: null,
   }));
 
   while (remainingProcesses.length > 0) {
@@ -16,8 +16,12 @@ export const stcf = (processes) => {
     );
 
     if (availableProcesses.length === 0) {
-      // No processes available, increment time
-      currentTime++;
+      // No processes available, increment time to the next arrival
+      const nextArrival = remainingProcesses.reduce(
+        (min, p) => Math.min(min, p.arrivalTime),
+        Infinity
+      );
+      currentTime = nextArrival;
       continue;
     }
 
@@ -36,9 +40,26 @@ export const stcf = (processes) => {
       }
     }
 
-    // Simulate 1 unit of time for the selected process
-    nextProcess.remainingTime -= 1;
-    currentTime++;
+    // Calculate how long this process will run before potential preemption
+    let runUntil = currentTime + nextProcess.remainingTime;
+    
+    // Check if any process will arrive before this one completes
+    for (const process of remainingProcesses) {
+      // Skip the current process and processes that have already arrived
+      if (process === nextProcess || process.arrivalTime <= currentTime) continue;
+      
+      // If a process arrives before the current one completes
+      if (process.arrivalTime < runUntil) {
+        runUntil = process.arrivalTime;
+      }
+    }
+    
+    // Calculate how long this process will run in this segment
+    const timeSlice = runUntil - currentTime;
+    
+    // Update the process's remaining time
+    nextProcess.remainingTime -= timeSlice;
+    currentTime = runUntil;
 
     // Check if the process is completed
     if (nextProcess.remainingTime === 0) {

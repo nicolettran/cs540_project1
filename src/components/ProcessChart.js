@@ -32,59 +32,62 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
           // Sort process IDs numerically
           processIds.sort((a, b) => a - b);
           
-          // Create datasets for each process's segments
+          // Create labels for the y-axis
+          const labels = processIds.map(id => `${id}`);
+          
+          // Prepare datasets for the chart
           const datasets = [];
           
-          processIds.forEach(pid => {
-            // Find the process(es) with this ID
-            const processEntries = processGroup.result.filter(p => p.processId === pid);
-            
-            processEntries.forEach(process => {
-              // For FIFO and SJF, use startTime and endTime directly
-              if (processGroup.name === "FIFO" || processGroup.name === "SJF") {
-                datasets.push({
-                  label: `Process ${process.processId}`,
-                  data: [{
-                    y: process.processId, // Use process ID as y value
-                    x: [process.startTime, process.endTime]
-                  }],
-                  backgroundColor: `rgba(75, 192, 192, 0.6)`,
-                  barPercentage: 0.95
+          // Group data by process ID for RR and STCF
+          if (processGroup.name === "RR" || processGroup.name === "STCF") {
+            // Create one dataset per process ID
+            processIds.forEach(processId => {
+              // Find all segments for this process ID
+              const processInstances = processGroup.result.filter(p => p.processId === processId);
+              
+              // Collect all segments
+              const allSegments = [];
+              processInstances.forEach(process => {
+                const segments = process.segments || process.executionSegments || [];
+                segments.forEach(segment => {
+                  allSegments.push({
+                    startTime: segment.startTime,
+                    endTime: segment.endTime
+                  });
                 });
-              } else {
-                // For RR and STCF, use segments or executionSegments
-                if (process.segments && process.segments.length > 0) {
-                  process.segments.forEach((segment, index) => {
-                    datasets.push({
-                      label: `Process ${process.processId} (Segment ${index + 1})`,
-                      data: [{
-                        y: process.processId, // Use process ID as y value
-                        x: [segment.startTime, segment.endTime]
-                      }],
-                      backgroundColor: `rgba(75, 192, 192, 0.6)`,
-                      barPercentage: 0.95
-                    });
-                  });
-                } else if (process.executionSegments && process.executionSegments.length > 0) {
-                  process.executionSegments.forEach((segment, index) => {
-                    datasets.push({
-                      label: `Process ${process.processId} (Segment ${index + 1})`,
-                      data: [{
-                        y: process.processId, // Use process ID as y value
-                        x: [segment.startTime, segment.endTime]
-                      }],
-                      backgroundColor: `rgba(75, 192, 192, 0.6)`,
-                      barPercentage: 0.95
-                    });
-                  });
-                }
-              }
+              });
+              
+              // Add all segments as separate data points in the same dataset
+              datasets.push({
+                label: `Process ${processId}`,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                data: allSegments.map(segment => ({
+                  x: [segment.startTime, segment.endTime],
+                  y: `${processId}`
+                })),
+                barPercentage: 0.95
+              });
             });
-          });
+          } else {
+            // For FIFO or SJF, keep the original approach
+            processGroup.result.forEach(process => {
+              const processId = process.processId;
+              const backgroundColor = 'rgba(75, 192, 192, 0.6)';
+              
+              datasets.push({
+                label: `Process ${processId}`,
+                backgroundColor,
+                data: [{ 
+                  x: [process.startTime, process.endTime], 
+                  y: `${processId}` 
+                }],
+                barPercentage: 0.95
+              });
+            });
+          }
 
-          // Prepare the data for the chart
           const data = {
-            labels: processIds.map(id => `Process ${id}`), // Labels for the y-axis
+            labels: labels,
             datasets: datasets
           };
 
@@ -122,16 +125,12 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                 }
               },
               y: {
-                type: 'category',
                 title: {
                   display: true,
                   text: 'Process ID'
                 },
-                reverse: true, // Process 1 at the bottom, increasing upwards
-                ticks: {
-                  // Ensure the y-axis labels match the process IDs
-                  callback: (value) => `Process ${value}`
-                }
+                type: 'category',
+                position: 'left'
               }
             }
           };
