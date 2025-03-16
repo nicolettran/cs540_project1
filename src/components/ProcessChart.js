@@ -27,19 +27,23 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
       <div className="gantt-container">
         {processes.map((processGroup) => {
           // Get all unique process IDs
-          const processIds = [...new Set(processGroup.result.map(p => p.processId))];
+          let processIds = [...new Set(processGroup.result.map(p => p.processId))];
+          processIds.sort((a, b) => a - b); // Ensure numerical sorting
           
-          // Sort process IDs numerically
-          processIds.sort((a, b) => a - b);
+          // Create a proper sequential numbering from 1 to N
+          const processIdToIndexMap = {};
+          processIds.forEach((id, index) => {
+            processIdToIndexMap[id] = index + 1; // Map to 1-based index
+          });
           
-          // Create labels for the y-axis
-          const labels = processIds.map(id => `${id}`);
+          // Create labels for the y-axis with sequential numbering
+          const labels = Array.from({length: processIds.length}, (_, i) => `${i + 1}`);
           
           // Prepare datasets for the chart
           const datasets = [];
           
-          // Group data by process ID for RR and STCF
-          if (processGroup.name === "RR" || processGroup.name === "STCF") {
+          // Group data by process ID for RR, STCF, and MLFQ
+          if (processGroup.name === "RR" || processGroup.name === "STCF" || processGroup.name === "MLFQ") {
             // Create one dataset per process ID
             processIds.forEach(processId => {
               // Find all segments for this process ID
@@ -57,38 +61,43 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                 });
               });
               
-              // Add all segments as separate data points in the same dataset
+              // Use the mapped index (1-based) for display
+              const displayId = processIdToIndexMap[processId];
+              
               datasets.push({
-                label: `Process ${processId}`,
+                label: `Process ${displayId}`,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 data: allSegments.map(segment => ({
                   x: [segment.startTime, segment.endTime],
-                  y: `${processId}`
+                  y: `${displayId}`
                 })),
-                barPercentage: 0.95
+                barPercentage: 4,
+                categoryPercentage: 1,
               });
             });
           } else {
-            // For FIFO or SJF, keep the original approach
+            // For FIFO or SJF, keep the original approach but with mapped IDs
             processGroup.result.forEach(process => {
               const processId = process.processId;
+              const displayId = processIdToIndexMap[processId];
               const backgroundColor = 'rgba(75, 192, 192, 0.6)';
               
               datasets.push({
-                label: `Process ${processId}`,
+                label: `Process ${displayId}`,
                 backgroundColor,
                 data: [{ 
                   x: [process.startTime, process.endTime], 
-                  y: `${processId}` 
+                  y: `${displayId}` 
                 }],
-                barPercentage: 0.95
+                barPercentage: 4,
+                categoryPercentage: 1,
               });
             });
           }
 
           const data = {
-            labels: labels,
-            datasets: datasets
+            labels,
+            datasets
           };
 
           const options = {
@@ -130,7 +139,12 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                   text: 'Process ID'
                 },
                 type: 'category',
-                position: 'left'
+                position: 'left',
+                min: 0,
+                max: numProcesses,
+                ticks: {
+                  autoSkip: false
+                }
               }
             }
           };
