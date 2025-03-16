@@ -26,59 +26,114 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
       <h3>Process Gantt Charts</h3>
       <div className="gantt-container">
         {processes.map((processGroup) => {
-          // Sort processes by processId for the chart
-          const sortedProcesses = [...processGroup.result].sort((a, b) => a.processId - b.processId);
-
-          // Reverse the order of processes to display 1 at the bottom and 5 at the top
-          const reversedProcesses = [...sortedProcesses].reverse();
-
-          // Prepare the dataset for the current algorithm's Gantt chart
-          const dataset = {
-            label: processGroup.name, // The algorithm name
-            data: reversedProcesses.map((process) => ({
-              y: process.processId, // Process ID on the Y axis (just the number)
-              x: [process.startTime, process.endTime], // Start and end time on the X axis
-              backgroundColor: "rgba(75, 192, 192, 0.6)", // Color for bars
-            })),
-            backgroundColor: "rgba(75, 192, 192, 0.6)", // Color for bars
-          };
+          // Get all unique process IDs
+          const processIds = [...new Set(processGroup.result.map(p => p.processId))];
+          
+          // Sort process IDs numerically
+          processIds.sort((a, b) => a - b);
+          
+          // Create datasets for each process's segments
+          const datasets = [];
+          
+          processIds.forEach(pid => {
+            // Find the process(es) with this ID
+            const processEntries = processGroup.result.filter(p => p.processId === pid);
+            
+            processEntries.forEach(process => {
+              // For FIFO and SJF, use startTime and endTime directly
+              if (processGroup.name === "FIFO" || processGroup.name === "SJF") {
+                datasets.push({
+                  label: `Process ${process.processId}`,
+                  data: [{
+                    y: process.processId, // Use process ID as y value
+                    x: [process.startTime, process.endTime]
+                  }],
+                  backgroundColor: `rgba(75, 192, 192, 0.6)`,
+                  barPercentage: 0.95
+                });
+              } else {
+                // For RR and STCF, use segments or executionSegments
+                if (process.segments && process.segments.length > 0) {
+                  process.segments.forEach((segment, index) => {
+                    datasets.push({
+                      label: `Process ${process.processId} (Segment ${index + 1})`,
+                      data: [{
+                        y: process.processId, // Use process ID as y value
+                        x: [segment.startTime, segment.endTime]
+                      }],
+                      backgroundColor: `rgba(75, 192, 192, 0.6)`,
+                      barPercentage: 0.95
+                    });
+                  });
+                } else if (process.executionSegments && process.executionSegments.length > 0) {
+                  process.executionSegments.forEach((segment, index) => {
+                    datasets.push({
+                      label: `Process ${process.processId} (Segment ${index + 1})`,
+                      data: [{
+                        y: process.processId, // Use process ID as y value
+                        x: [segment.startTime, segment.endTime]
+                      }],
+                      backgroundColor: `rgba(75, 192, 192, 0.6)`,
+                      barPercentage: 0.95
+                    });
+                  });
+                }
+              }
+            });
+          });
 
           // Prepare the data for the chart
           const data = {
-            labels: reversedProcesses.map((process) => process.processId.toString()), // Only numbers
-            datasets: [dataset],
+            labels: processIds.map(id => `Process ${id}`), // Labels for the y-axis
+            datasets: datasets
           };
 
           const options = {
-            indexAxis: "y", // Swaps the axes (y-axis for processes, x-axis for time)
+            indexAxis: 'y',
             responsive: true,
-            maintainAspectRatio: false, // Allows custom sizing
+            maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: false, // Remove legend (since the title already states the algorithm)
+                display: false
               },
               title: {
-                display: false, // Remove extra title
+                display: false
               },
+              tooltip: {
+                callbacks: {
+                  title: (tooltipItems) => {
+                    return `Process ${tooltipItems[0].raw.y}`;
+                  },
+                  label: (tooltipItem) => {
+                    const start = tooltipItem.raw.x[0];
+                    const end = tooltipItem.raw.x[1];
+                    return `Time: ${start} - ${end}`;
+                  }
+                }
+              }
             },
             scales: {
               x: {
-                type: "linear", // X-axis represents time (linear scale)
+                type: 'linear',
                 beginAtZero: true,
                 title: {
                   display: true,
-                  text: "Time",
-                },
+                  text: 'Time'
+                }
               },
               y: {
-                type: "category", // Y-axis represents process IDs (category scale)
+                type: 'category',
                 title: {
                   display: true,
-                  text: "Process ID", // Added y-axis label
+                  text: 'Process ID'
                 },
-                reverse: false, // Ensure the y-axis is not reversed (1 at the bottom, 5 at the top)
-              },
-            },
+                reverse: true, // Process 1 at the bottom, increasing upwards
+                ticks: {
+                  // Ensure the y-axis labels match the process IDs
+                  callback: (value) => `Process ${value}`
+                }
+              }
+            }
           };
 
           return (

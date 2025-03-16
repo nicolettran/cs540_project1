@@ -54,6 +54,10 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
                 <th>Start Time</th>
                 <th>End Time</th>
                 <th>Waiting Time</th> {/* Add Waiting Time column */}
+                {/* Only show Execution Segments for RR and STCF */}
+                {(algorithmResult.name === "RR" || algorithmResult.name === "STCF") && (
+                  <th>Execution Segments</th>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -65,6 +69,20 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
                   <td>{result.startTime}</td>
                   <td>{result.endTime}</td>
                   <td>{result.waitingTime}</td> {/* Display Waiting Time */}
+                  {/* Only show Execution Segments for RR and STCF */}
+                  {(algorithmResult.name === "RR" || algorithmResult.name === "STCF") && (
+                    <td>
+                      {result.segments ? (
+                        result.segments.map((segment, idx) => (
+                          <div key={idx}>
+                            {segment.startTime} - {segment.endTime}
+                          </div>
+                        ))
+                      ) : (
+                        <div>No segments</div>
+                      )}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

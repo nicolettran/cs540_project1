@@ -1,7 +1,7 @@
 export const rr = (processes, timeQuantum) => {
-  let currentTime = 0; // Tracks total time elapsed
-  let queue = []; // Ready queue
-  let results = []; // Final results array
+  let currentTime = 0;
+  let queue = [];
+  let results = [];
 
   // Initialize process tracking
   let remainingProcesses = processes.map((p) => ({
@@ -10,8 +10,8 @@ export const rr = (processes, timeQuantum) => {
     startTime: null,
     endTime: null,
     waitingTime: 0,
-    turnaroundTime: 0,
-    lastCompletionTime: 0, // Track when a process last finished executing
+    segments: [], // Track execution segments
+    lastStartTime: null // Track when the process last started execution
   }));
 
   // Sort processes by arrival time
@@ -40,10 +40,9 @@ export const rr = (processes, timeQuantum) => {
     let process = queue.shift();
 
     // Calculate waiting time correctly
-    if (process.startTime === null) {
-      process.waitingTime = currentTime - process.arrivalTime;
-    } else {
-      process.waitingTime += currentTime - process.lastCompletionTime;
+    if (process.lastStartTime === null) {
+      // If this is a new segment, update waiting time
+      process.waitingTime += currentTime - (process.arrivalTime + (process.burstTime - process.remainingTime));
     }
 
     // Set start time only the first time it runs
@@ -51,15 +50,24 @@ export const rr = (processes, timeQuantum) => {
       process.startTime = currentTime;
     }
 
+    // Mark the start of this execution segment
+    process.lastStartTime = currentTime;
+
     // Execution time
     let executionTime = Math.min(timeQuantum, process.remainingTime);
     process.remainingTime -= executionTime;
     currentTime += executionTime;
-    
-    // Update the completion time
-    process.lastCompletionTime = currentTime;
 
-    // Add new arrivals during execution **before re-adding current process**
+    // Record this execution segment
+    process.segments.push({
+      startTime: process.lastStartTime,
+      endTime: currentTime
+    });
+    
+    // Reset lastStartTime for next time
+    process.lastStartTime = null;
+
+    // Add new arrivals during execution
     while (index < remainingProcesses.length && remainingProcesses[index].arrivalTime <= currentTime) {
       queue.push(remainingProcesses[index]);
       index++;
@@ -68,10 +76,9 @@ export const rr = (processes, timeQuantum) => {
     if (process.remainingTime === 0) {
       // Process is completed
       process.endTime = currentTime;
-      process.turnaroundTime = process.endTime - process.arrivalTime;
       results.push(process);
     } else {
-      // Re-add to queue **after** processing new arrivals
+      // Re-add to queue
       queue.push(process);
     }
   }
