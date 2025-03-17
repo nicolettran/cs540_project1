@@ -43,8 +43,8 @@ h1 {
 
 .input-group label {
   font-size: 0.8rem;
-  margin-bottom: 5px;
-  color: #d43c6f;
+  margin-bottom: 6px;
+  color: #5a1a2e;
 }
 
 input,
@@ -111,6 +111,7 @@ button:hover {
   text-align: center;
   border: 1px solid #ffcce0;
   font-size: 0.85rem;
+  color: #5a1a2e; /* Change the text color to #5a1a2e for the table cells */
 }
 
 .results-container table th {
@@ -131,7 +132,7 @@ h2 {
   transition: background-color 0.3s ease;
   padding: 5px;
   font-size: 0.8rem;
-  margin-top: 5px;
+  margin-top: 10px;
   border: 1px solid #ffcce0;
   border-radius: 4px;
   width: 25%;

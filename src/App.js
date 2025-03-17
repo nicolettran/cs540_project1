@@ -237,7 +237,7 @@ function App() {
         <button onClick={runAlgorithms}>Run algorithms</button>
       </div>
       <div className="results-container fade-in">
-        <h2>Results</h2>
+        <h2>Results ₍⑅ᐢ..ᐢ₎</h2>
         <div className="loading-message">{loadingMessage}</div>
         {showChooseAlgorithmsMessage && !results.length && (
           <div className="loading-message">Please choose any algorithm to run.</div>
@@ -252,7 +252,7 @@ function App() {
         )}
       </div>
       <div className="animation-container slide-in">
-        <h2>Simulation</h2>
+        <h2>Simulation ₍ᐢ.  ̫.ᐢ₎</h2>
         <ProcessChart processes={results} currentTime={currentTime} numProcesses={numProcesses} />
       </div>
     </div>
