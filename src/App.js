@@ -7,7 +7,12 @@ import { rr } from "./algorithms/rr";
 import { mlfq } from "./algorithms/mlfq";
 import ResultsDisplay from "./components/ResultsDisplay";
 import ProcessChart from "./components/ProcessChart";
-import "./styles/App.css"; // Import the CSS file
+import { jsPDF } from "jspdf";
+import { applyPlugin } from "jspdf-autotable";
+import "./styles/App.css";
+
+// Apply the autoTable plugin to jsPDF
+applyPlugin(jsPDF);
 
 function App() {
   const [numProcesses, setNumProcesses] = useState(5);
@@ -28,25 +33,24 @@ function App() {
 
   // Generate random processes
   const handleGenerateProcesses = () => {
-    setLoadingMessage("Generating processes"); // Start with no dots
+    setLoadingMessage("Generating processes");
     let dots = 0;
     const loadingInterval = setInterval(() => {
-      setLoadingMessage("Generating processes" + ".".repeat(dots)); // Append dots based on the current value of `dots`
-      dots = (dots + 1) % 4; // Cycle through 0, 1, 2, 3
-    }, 500); // Update every 500ms
+      setLoadingMessage("Generating processes" + ".".repeat(dots));
+      dots = (dots + 1) % 4;
+    }, 500);
 
     const generatedProcesses = generateProcesses(numProcesses);
     setProcesses(generatedProcesses);
-    setResults([]); // Clear previous results
-    setCurrentTime(0); // Reset time
-    setIsRunning(false); // Stop any running simulation
+    setResults([]);
+    setCurrentTime(0);
+    setIsRunning(false);
 
-    // Clear the loading interval after process generation
     setTimeout(() => {
       clearInterval(loadingInterval);
-      setLoadingMessage(""); // Clear the message after generating processes
-      setShowChooseAlgorithmsMessage(true); // Show "Please choose any algorithms to run." message
-    }, 2500); // Stop the animation after 2 seconds
+      setLoadingMessage("");
+      setShowChooseAlgorithmsMessage(true);
+    }, 2500);
   };
 
   // Run selected algorithms
@@ -74,8 +78,82 @@ function App() {
     }
 
     setResults(algorithmsResults);
-    setIsRunning(true); // Start the simulation
-    setShowChooseAlgorithmsMessage(false); // Hide the message after running the algorithms
+    setIsRunning(true);
+    setShowChooseAlgorithmsMessage(false);
+  };
+
+  // Function to export the table and Gantt charts as PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    let yOffset = 20; // Starting Y position for the first Gantt chart
+
+    results.forEach((algorithmResult) => {
+      const tableData = algorithmResult.result.map((result) => {
+        const row = [
+          result.processId,
+          result.arrivalTime,
+          result.burstTime,
+          result.startTime,
+          result.endTime,
+          result.waitingTime,
+        ];
+
+        if (["RR", "STCF", "MLFQ"].includes(algorithmResult.name)) {
+          row.push(
+            result.segments
+              ? result.segments.map((segment) => `${segment.startTime}-${segment.endTime}`).join(", ")
+              : "No segments"
+          );
+        }
+
+        return row;
+      });
+
+      const headers = [
+        "Process ID",
+        "Arrival Time",
+        "Burst Time",
+        "Start Time",
+        "End Time",
+        "Waiting Time",
+      ];
+
+      if (["RR", "STCF", "MLFQ"].includes(algorithmResult.name)) {
+        headers.push("Execution Segments");
+      }
+
+      doc.text(algorithmResult.name, 10, yOffset);
+      doc.autoTable({
+        head: [headers],
+        body: tableData,
+        startY: yOffset + 10,
+        theme: "grid",
+      });
+
+      // Adjust the yOffset to account for the height of the table
+      const tableHeight = doc.lastAutoTable.finalY;
+      yOffset = tableHeight + 10; // Add some space before the Gantt chart
+
+      // Add Gantt charts for each algorithm
+      algorithmResult.result.forEach((process, index) => {
+        const chartCanvas = document.getElementById(`gantt-chart-${algorithmResult.name}-${index}`);
+        if (chartCanvas) {
+          const imgData = chartCanvas.toDataURL("image/png");
+          const chartWidth = 140; // Set the width of the chart (you can adjust this value)
+          const chartHeight = 60; // Adjust the height to maintain a proper aspect ratio (you can adjust this value)
+          doc.addImage(imgData, "PNG", 10, yOffset, chartWidth, chartHeight); // Adjusted width and height
+          yOffset += chartHeight + 10; // Increase yOffset for the next chart to avoid overlap
+        }
+      });
+
+      // If there are more results, add a new page and reset yOffset for the next page
+      if (results.indexOf(algorithmResult) < results.length - 1) {
+        doc.addPage();
+        yOffset = 20; // Reset Y position for the next page
+      }
+    });
+
+    doc.save("results.pdf");
   };
 
   // Simulate the passage of time
@@ -83,9 +161,8 @@ function App() {
     if (isRunning) {
       const interval = setInterval(() => {
         setCurrentTime((prevTime) => prevTime + 1);
-      }, 1000); // Update every second
+      }, 1000);
 
-      // Stop the simulation when all processes are completed
       if (currentTime >= Math.max(...results.flatMap(result => result.result.map(process => process.endTime)))) {
         setIsRunning(false);
       }
@@ -144,14 +221,18 @@ function App() {
       </div>
       <div className="results-container fade-in">
         <h2>Results</h2>
-        {/* Show loading message only */}
         <div className="loading-message">{loadingMessage}</div>
-        {/* Show the "Please choose any algorithms to run" message */}
         {showChooseAlgorithmsMessage && !results.length && (
           <div className="loading-message">Please choose any algorithm to run.</div>
         )}
-        {/* Show ResultsDisplay only when results exist */}
-        {results.length > 0 && <ResultsDisplay results={results} />}
+        {results.length > 0 && (
+          <>
+            <ResultsDisplay results={results} />
+            <button className="button-common" onClick={exportToPDF}>
+              Export as PDF
+            </button>
+          </>
+        )}
       </div>
       <div className="animation-container slide-in">
         <h2>Simulation</h2>
@@ -162,4 +243,3 @@ function App() {
 }
 
 export default App;
-

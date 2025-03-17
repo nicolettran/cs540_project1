@@ -25,7 +25,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
     <div>
       <h3>Process Gantt Charts</h3>
       <div className="gantt-container">
-        {processes.map((processGroup) => {
+        {processes.map((processGroup, groupIndex) => {
           // Get all unique process IDs
           let processIds = [...new Set(processGroup.result.map(p => p.processId))];
           processIds.sort((a, b) => a - b); // Ensure numerical sorting
@@ -37,14 +37,13 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
           });
           
           // Create labels for the y-axis with sequential numbering
-          const labels = Array.from({length: processIds.length}, (_, i) => `${i + 1}`);
+          const labels = Array.from({ length: processIds.length }, (_, i) => `${i + 1}`);
           
           // Prepare datasets for the chart
           const datasets = [];
           
           // Group data by process ID for RR, STCF, and MLFQ
           if (processGroup.name === "RR" || processGroup.name === "STCF" || processGroup.name === "MLFQ") {
-            // Create one dataset per process ID
             processIds.forEach(processId => {
               // Find all segments for this process ID
               const processInstances = processGroup.result.filter(p => p.processId === processId);
@@ -93,6 +92,11 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                 categoryPercentage: .4,
               });
             });
+          }
+
+          // Prevent empty datasets and handle case for very few processes
+          if (datasets.length === 0) {
+            return null; // Skip rendering if no data is available for this process group
           }
 
           const data = {
@@ -153,7 +157,11 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
             <div key={processGroup.name} className="gantt-chart" style={{ height: `${chartHeight}px` }}>
               <h4 className="gantt-algo-title">{processGroup.name}</h4>
               <div className="chart-wrapper">
-                <Bar data={data} options={options} />
+                <Bar
+                  id={`gantt-chart-${processGroup.name}-${groupIndex}`} // Add a unique ID for each chart
+                  data={data}
+                  options={options}
+                />
               </div>
             </div>
           );

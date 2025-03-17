@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
-import { applyPlugin } from "jspdf-autotable";
 
-// Apply the autoTable plugin to jsPDF
-applyPlugin(jsPDF);
-
+// ResultsDisplay component
 const ResultsDisplay = ({ results, processesGenerated }) => {
   const [loadingText, setLoadingText] = useState("Generating processes");
   const [dots, setDots] = useState("");
@@ -26,60 +22,6 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
     }
   }, [processesGenerated, results]);
 
-  // Function to export the table as PDF
-  const exportToPDF = () => {
-    const doc = new jsPDF();
-
-    results.forEach((algorithmResult) => {
-      const tableData = algorithmResult.result.map((result) => {
-        const row = [
-          result.processId,
-          result.arrivalTime,
-          result.burstTime,
-          result.startTime,
-          result.endTime,
-          result.waitingTime,
-        ];
-
-        if (["RR", "STCF", "MLFQ"].includes(algorithmResult.name)) {
-          row.push(
-            result.segments
-              ? result.segments.map((segment) => `${segment.startTime}-${segment.endTime}`).join(", ")
-              : "No segments"
-          );
-        }
-
-        return row;
-      });
-
-      const headers = [
-        "Process ID",
-        "Arrival Time",
-        "Burst Time",
-        "Start Time",
-        "End Time",
-        "Waiting Time",
-      ];
-
-      if (["RR", "STCF", "MLFQ"].includes(algorithmResult.name)) {
-        headers.push("Execution Segments");
-      }
-
-      doc.text(algorithmResult.name, 10, 10);
-      doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 20,
-      });
-
-      if (results.indexOf(algorithmResult) < results.length - 1) {
-        doc.addPage();
-      }
-    });
-
-    doc.save("results.pdf");
-  };
-
   return (
     <div>
       {results.length === 0 && !processesGenerated && (
@@ -98,9 +40,6 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
 
       {results.length > 0 && (
         <div>
-          <button className="button-common" onClick={exportToPDF}>
-            Export as PDF
-          </button>
           {results.map((algorithmResult) => (
             <div key={algorithmResult.name}>
               <h4 className="algorithm-title">{algorithmResult.name}</h4>
@@ -153,3 +92,4 @@ const ResultsDisplay = ({ results, processesGenerated }) => {
 };
 
 export default ResultsDisplay;
+
