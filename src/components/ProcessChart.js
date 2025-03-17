@@ -89,7 +89,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
   }, [animationRunning, maxTime]);
 
   if (!processes || processes.length === 0) {
-    return <div>No processes to display.</div>;
+    return <div className="no-processes-message">No processes to display.</div>;
   }
 
   return (

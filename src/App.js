@@ -198,7 +198,7 @@ function App() {
 
   return (
     <div className="app-container">
-      <h1 className="fade-in">CPU Scheduling Simulator</h1>
+      <h1 className="fade-in">₊˚⊹ ꒰ᐢ. .ᐢ꒱ᰔ˚₊‧ ୨୧ ‧₊˚ ⋅ CPU Scheduling Simulator ⋅˚₊‧ ୨୧ ‧₊˚❀⋆.ೃ࿔*:･</h1>
       <div className="input-container slide-in">
         <div className="input-group">
           <label>Number of processes: </label>
