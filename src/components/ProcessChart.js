@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,9 +14,9 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const ProcessChart = ({ processes, currentTime, numProcesses }) => {
-  if (!processes || processes.length === 0) {
-    return <div>No processes to display.</div>;
-  }
+  const [animationTime, setAnimationTime] = useState(0);
+  const [animationRunning, setAnimationRunning] = useState(false);
+  const [maxTime, setMaxTime] = useState(0);
 
   // Generate a moderately saturated pastel color palette for processes
   const generatePastelPalette = (numColors) => {
@@ -51,6 +51,46 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
 
   // Calculate dynamic height based on the number of processes
   const chartHeight = Math.max(200, numProcesses * 40); // Minimum height of 200px, 40px per process
+
+  // Initialize animation when processes change
+  useEffect(() => {
+    if (processes && processes.length > 0) {
+      // Find the maximum end time across all processes
+      const maxEndTime = Math.max(...processes.flatMap(processGroup => 
+        processGroup.result.map(process => process.endTime)
+      ));
+      
+      setMaxTime(maxEndTime);
+      setAnimationTime(0);
+      setAnimationRunning(true);
+    }
+  }, [processes]);
+
+  // Run the animation
+  useEffect(() => {
+    if (animationRunning && maxTime > 0) {
+      const animationDuration = 10000; // 10 seconds
+      const stepTime = animationDuration / maxTime;
+      
+      const interval = setInterval(() => {
+        setAnimationTime(prevTime => {
+          const newTime = prevTime + 1;
+          if (newTime >= maxTime) {
+            clearInterval(interval);
+            setAnimationRunning(false);
+            return maxTime;
+          }
+          return newTime;
+        });
+      }, stepTime);
+      
+      return () => clearInterval(interval);
+    }
+  }, [animationRunning, maxTime]);
+
+  if (!processes || processes.length === 0) {
+    return <div>No processes to display.</div>;
+  }
 
   return (
     <div>
@@ -87,10 +127,19 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               processInstances.forEach(process => {
                 const segments = process.segments || process.executionSegments || [];
                 segments.forEach(segment => {
-                  allSegments.push({
-                    startTime: segment.startTime,
-                    endTime: segment.endTime
-                  });
+                  // Apply animation to the segment end time
+                  const animatedEndTime = Math.min(
+                    segment.endTime, 
+                    Math.max(segment.startTime, animationTime)
+                  );
+                  
+                  // Only include segments that have started
+                  if (segment.startTime <= animationTime) {
+                    allSegments.push({
+                      startTime: segment.startTime,
+                      endTime: animatedEndTime
+                    });
+                  }
                 });
               });
               
@@ -112,7 +161,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               });
             });
           } else {
-            // For FIFO or SJF, keep the original approach but with mapped IDs and colors
+            // For FIFO or SJF
             processGroup.result.forEach(process => {
               const processId = process.processId;
               const displayId = processIdToIndexMap[processId];
@@ -121,16 +170,24 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               const colorIndex = displayId - 1;
               const backgroundColor = colorPalette[colorIndex % colorPalette.length];
               
-              datasets.push({
-                label: `Process ${displayId}`,
-                backgroundColor,
-                data: [{ 
-                  x: [process.startTime, process.endTime], 
-                  y: `${displayId}` 
-                }],
-                barPercentage: 6,
-                categoryPercentage: .4,
-              });
+              // Apply animation to the process end time
+              if (process.startTime <= animationTime) {
+                const animatedEndTime = Math.min(
+                  process.endTime, 
+                  Math.max(process.startTime, animationTime)
+                );
+                
+                datasets.push({
+                  label: `Process ${displayId}`,
+                  backgroundColor,
+                  data: [{ 
+                    x: [process.startTime, animatedEndTime], 
+                    y: `${displayId}` 
+                  }],
+                  barPercentage: 6,
+                  categoryPercentage: .4,
+                });
+              }
             });
           }
 
@@ -172,6 +229,7 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               x: {
                 type: 'linear',
                 beginAtZero: true,
+                max: maxTime, // Set max to the highest end time
                 title: {
                   display: true,
                   text: 'Time'
@@ -190,6 +248,9 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
                   autoSkip: false
                 }
               }
+            },
+            animation: {
+              duration: 0 // Disable default animations as we're handling them ourselves
             }
           };
 
