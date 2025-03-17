@@ -30,6 +30,7 @@ function App() {
   const [isRunning, setIsRunning] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("No results to display.");
   const [showChooseAlgorithmsMessage, setShowChooseAlgorithmsMessage] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
 
   // Generate random processes
   const handleGenerateProcesses = () => {
@@ -45,6 +46,7 @@ function App() {
     setResults([]);
     setCurrentTime(0);
     setIsRunning(false);
+    setChartsReady(false);
 
     setTimeout(() => {
       clearInterval(loadingInterval);
@@ -80,14 +82,26 @@ function App() {
     setResults(algorithmsResults);
     setIsRunning(true);
     setShowChooseAlgorithmsMessage(false);
+    setChartsReady(false);
+    
+    // Set a timer to mark charts as ready after a delay
+    setTimeout(() => {
+      setChartsReady(true);
+    }, 1000);
   };
 
   // Function to export the table and Gantt charts as PDF
   const exportToPDF = () => {
+    if (!chartsReady) {
+      // If charts aren't ready yet, wait a bit longer
+      setTimeout(exportToPDF, 500);
+      return;
+    }
+    
     const doc = new jsPDF();
-    let yOffset = 20; // Starting Y position for the first Gantt chart
+    let yOffset = 20;
 
-    results.forEach((algorithmResult) => {
+    results.forEach((algorithmResult, index) => {
       const tableData = algorithmResult.result.map((result) => {
         const row = [
           result.processId,
@@ -130,26 +144,27 @@ function App() {
         theme: "grid",
       });
 
-      // Adjust the yOffset to account for the height of the table
       const tableHeight = doc.lastAutoTable.finalY;
-      yOffset = tableHeight + 10; // Add some space before the Gantt chart
+      yOffset = tableHeight + 20;
 
-      // Add Gantt charts for each algorithm
-      algorithmResult.result.forEach((process, index) => {
-        const chartCanvas = document.getElementById(`gantt-chart-${algorithmResult.name}-${index}`);
-        if (chartCanvas) {
-          const imgData = chartCanvas.toDataURL("image/png");
-          const chartWidth = 140; // Set the width of the chart (you can adjust this value)
-          const chartHeight = 60; // Adjust the height to maintain a proper aspect ratio (you can adjust this value)
-          doc.addImage(imgData, "PNG", 10, yOffset, chartWidth, chartHeight); // Adjusted width and height
-          yOffset += chartHeight + 10; // Increase yOffset for the next chart to avoid overlap
+      // Find and capture the chart
+      const chartElement = document.querySelector(`.gantt-chart:nth-child(${index + 1}) canvas`);
+      
+      if (chartElement) {
+        try {
+          const imgData = chartElement.toDataURL("image/png");
+          const chartWidth = 140;
+          const chartHeight = 60;
+          doc.addImage(imgData, "PNG", 10, yOffset, chartWidth, chartHeight);
+          yOffset += chartHeight + 20;
+        } catch (error) {
+          console.error("Error capturing chart:", error);
         }
-      });
+      }
 
-      // If there are more results, add a new page and reset yOffset for the next page
-      if (results.indexOf(algorithmResult) < results.length - 1) {
+      if (index < results.length - 1) {
         doc.addPage();
-        yOffset = 20; // Reset Y position for the next page
+        yOffset = 20;
       }
     });
 
@@ -165,6 +180,8 @@ function App() {
 
       if (currentTime >= Math.max(...results.flatMap(result => result.result.map(process => process.endTime)))) {
         setIsRunning(false);
+        // Mark charts as ready when simulation completes
+        setChartsReady(true);
       }
 
       return () => clearInterval(interval);
@@ -228,7 +245,7 @@ function App() {
         {results.length > 0 && (
           <>
             <ResultsDisplay results={results} />
-            <button className="button-common" onClick={exportToPDF}>
+            <button className="button-common" onClick={exportToPDF} disabled={!chartsReady}>
               Export as PDF
             </button>
           </>
@@ -236,7 +253,7 @@ function App() {
       </div>
       <div className="animation-container slide-in">
         <h2>Simulation</h2>
-        <ProcessChart processes={results} currentTime={currentTime} />
+        <ProcessChart processes={results} currentTime={currentTime} numProcesses={numProcesses} />
       </div>
     </div>
   );
