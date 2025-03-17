@@ -179,6 +179,13 @@ h2 {
   box-shadow: none;
 }
 
+.process-chart-title {
+  font-size: 1rem; /* Smaller font size for the main chart title */
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #000000; 
+}
+
 .gantt-container {
   display: flex;
   flex-wrap: wrap;

@@ -18,12 +18,43 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
     return <div>No processes to display.</div>;
   }
 
+  // Generate a moderately saturated pastel color palette for processes
+  const generatePastelPalette = (numColors) => {
+    const pastelColors = [
+      'rgba(132, 199, 255, 0.82)',  // Moderate pastel Blue
+      'rgba(245, 140, 186, 0.82)',  // Moderate pastel Pink
+      'rgba(145, 214, 149, 0.82)',  // Moderate pastel Green
+      'rgba(255, 183, 107, 0.82)',  // Moderate pastel Orange
+      'rgba(175, 142, 225, 0.82)',  // Moderate pastel Purple
+      'rgba(255, 240, 124, 0.82)',  // Moderate pastel Yellow
+      'rgba(125, 211, 207, 0.82)',  // Moderate pastel Teal
+      'rgba(255, 158, 140, 0.82)',  // Moderate pastel Coral
+      'rgba(209, 160, 220, 0.82)',  // Moderate pastel Lavender
+      'rgba(167, 213, 130, 0.82)',  // Moderate pastel Lime
+      'rgba(143, 163, 174, 0.82)',  // Moderate pastel Blue Gray
+      'rgba(255, 182, 154, 0.82)',  // Moderate pastel Peach
+    ];
+    
+    // If we need more colors than in our palette, generate additional pastel colors
+    if (numColors > pastelColors.length) {
+      for (let i = pastelColors.length; i < numColors; i++) {
+        // Generate moderately saturated pastel colors
+        const r = Math.floor(Math.random() * 75) + 180; // 180-255 range
+        const g = Math.floor(Math.random() * 75) + 180; // 180-255 range
+        const b = Math.floor(Math.random() * 75) + 180; // 180-255 range
+        pastelColors.push(`rgba(${r}, ${g}, ${b}, 0.82)`);
+      }
+    }
+    
+    return pastelColors;
+  };
+
   // Calculate dynamic height based on the number of processes
   const chartHeight = Math.max(200, numProcesses * 40); // Minimum height of 200px, 40px per process
 
   return (
     <div>
-      <h3>Process Gantt Charts</h3>
+      <h3 className="process-chart-title">Process Gantt Charts</h3>
       <div className="gantt-container">
         {processes.map((processGroup, groupIndex) => {
           // Get all unique process IDs
@@ -39,12 +70,15 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
           // Create labels for the y-axis with sequential numbering
           const labels = Array.from({ length: processIds.length }, (_, i) => `${i + 1}`);
           
+          // Generate pastel color palette based on the number of unique processes
+          const colorPalette = generatePastelPalette(processIds.length);
+          
           // Prepare datasets for the chart
           const datasets = [];
           
           // Group data by process ID for RR, STCF, and MLFQ
           if (processGroup.name === "RR" || processGroup.name === "STCF" || processGroup.name === "MLFQ") {
-            processIds.forEach(processId => {
+            processIds.forEach((processId, colorIndex) => {
               // Find all segments for this process ID
               const processInstances = processGroup.result.filter(p => p.processId === processId);
               
@@ -63,9 +97,12 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               // Use the mapped index (1-based) for display
               const displayId = processIdToIndexMap[processId];
               
+              // Use the color from our pastel palette based on the process index
+              const backgroundColor = colorPalette[colorIndex % colorPalette.length];
+              
               datasets.push({
                 label: `Process ${displayId}`,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                backgroundColor,
                 data: allSegments.map(segment => ({
                   x: [segment.startTime, segment.endTime],
                   y: `${displayId}`
@@ -75,11 +112,14 @@ const ProcessChart = ({ processes, currentTime, numProcesses }) => {
               });
             });
           } else {
-            // For FIFO or SJF, keep the original approach but with mapped IDs
+            // For FIFO or SJF, keep the original approach but with mapped IDs and colors
             processGroup.result.forEach(process => {
               const processId = process.processId;
               const displayId = processIdToIndexMap[processId];
-              const backgroundColor = 'rgba(75, 192, 192, 0.6)';
+              
+              // Get the color index for this process - subtract 1 because displayId starts at 1
+              const colorIndex = displayId - 1;
+              const backgroundColor = colorPalette[colorIndex % colorPalette.length];
               
               datasets.push({
                 label: `Process ${displayId}`,
